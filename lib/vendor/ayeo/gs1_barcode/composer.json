@@ -1,0 +1,32 @@
+{
+  "name": "ayeo/gs1_barcode",
+  "version": "1.0.3",
+  "description": "Generate GS1-128 standard barcode",
+  "keywords": [
+    "gs1",
+    "barcode",
+    "gs1-128"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "ayeo",
+      "email": "me@ayeo.pl",
+      "homepage": "http://ayeo.pl"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=5.4.0",
+    "ext-gd": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ayeo\\Barcode\\": "src//"
+    }
+  }
+}

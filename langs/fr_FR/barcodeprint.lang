@@ -1,0 +1,91 @@
+# Copyright (C) 2022 Francis Appels <francis.appels@z-application.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Generic
+#
+
+# Module label 'ModuleBarcodePrintName'
+ModuleBarcodePrintName = Barcode Print
+# Module description 'ModuleBarcodePrintDesc'
+ModuleBarcodePrintDesc = Imprimer etiquettes code barre 1D GS1 et etiquettes code barre ZPL
+
+#
+# Admin page
+#
+BarcodePrintSetup = Configuration du module barcode print
+Settings = Réglages
+BarcodePrintSetupPage = Page de configuration du module barcode print
+BARCODEPRINT_DEFAULT_MODELLABEL = Etiquette défaut
+#BARCODEPRINT_DEFAULT_MODELLABELTooltip = My param 1 tooltip
+BARCODEPRINT_DEFAULT_NONLOT_GENERATOR=Generateur code barre produit non lot
+BARCODEPRINT_DEFAULT_NONLOT_GENERATORTooltip='standard' ou 'tcpdf'
+BARCODEPRINT_ZEBRA_IP = Adresse IP du imprimante Zebra
+BARCODEPRINT_DATAMATRIX_MODE = GS1 datamatrix
+#BARCODEPRINT_DATAMATRIX_MODETooltip = datamatrix tooltip
+DeactivateLabel = Désactiver étiquette code barre
+
+#
+# About page
+#
+About = À propos
+BarcodePrintAbout = À propos de Barcode Print
+BarcodePrintAboutPage = Page à propos de Barcode Print
+
+#
+# Sample page
+#
+GenerateBarcode = Générer code-barre
+BarCodeDataForReception = Donnees code-barre de reception:
+BarcodeSheetGenerated = Etiquette code-barre générée
+BarcodePrinted = Étiquette(s) code-barres imprimée(s)
+OnlyOneGeneratorTypeAllowed = Only one type of generator allowed
+printer = Imprimante
+NumberOfStickersZpl = Nombre d'étiquettes à imprimer
+
+#
+# hooks
+#
+producible = Réalisable
+ValidatedProducible = Validé et réalisable
+InprogressProducible = En cours et réalisable
+ValidatedPartlyProducible = Validé partiellement réalisable
+InprogressPartlyProducible = En cours partiellement réalisable
+ValidatedNotProducible = Validé non réalisable
+InprogressNotProducible = En cours non réalisable
+GenerateDocZip = Générer des documents
+documented = Documenté
+DefaultDocs = Documents par défaut
+Docs = Documents
+NoDocuments = Aucun document pour créer un zip
+NoProducedDocumentForBatch = Aucun document pour le lot produit %s
+NoConsumedDocumentForBatch = Aucun document pour le lot consommé %s
+NoLines = Pas de lignes pour faire du zip
+OnlyDefaultProducedDocumentForBatch = Uniquement le document par défaut %s pour le lot produit %s
+OnlyDefaultConsumedDocumentForBatch = Uniquement le document par défaut %s pour le lot consommé %s
+LotDocsOnBothRefAndId = Les documents sont situés à la fois sur la référence et ID du lot
+LotDocsOnBothRefAndIdMesg = Les documents sont situés à la fois sur la référence et ID du lot %s
+DocumentZipGenerated = Documents zip générés
+
+#
+# Sample widget
+#
+MyWidget = My widget
+MyWidgetDescription = My widget description
+
+#
+# triggers
+#
+UnknownProject = Référence projet inconnu

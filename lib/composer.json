@@ -1,0 +1,6 @@
+{
+    "require": {
+        "ayeo/gs1_barcode": "1.0.3",
+        "andersonls/zpl": "^0.0.5"
+    }
+}

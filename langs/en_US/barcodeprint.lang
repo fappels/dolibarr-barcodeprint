@@ -1,0 +1,90 @@
+# Copyright (C) 2022 Francis Appels <francis.appels@z-application.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Generic
+#
+
+# Module label 'ModuleBarcodePrintName'
+ModuleBarcodePrintName = Barcode Print
+# Module description 'ModuleBarcodePrintDesc'
+ModuleBarcodePrintDesc = Barcode print for 1D GS1 labels and ZPL printing
+
+#
+# Admin page
+#
+BarcodePrintSetup = Barcode Print setup
+Settings = Settings
+BarcodePrintSetupPage = Barcode Print setup page
+BARCODEPRINT_DEFAULT_MODELLABEL = Default label model
+#BARCODEPRINT_DEFAULT_MODELLABELTooltip = My param 1 tooltip
+BARCODEPRINT_DEFAULT_NONLOT_GENERATOR=Barcode generator for non lot product
+BARCODEPRINT_DEFAULT_NONLOT_GENERATORTooltip='standard' or 'tcpdf'
+BARCODEPRINT_ZEBRA_IP = IP address Zebra printer
+BARCODEPRINT_DATAMATRIX_MODE = GS1 datamatrix
+#BARCODEPRINT_DATAMATRIX_MODETooltip = datamatrix tooltip
+DeactivateLabel = Deactivate barcode label
+#
+# About page
+#
+About = About
+BarcodePrintAbout = About Barcode Print
+BarcodePrintAboutPage = Barcode print about page
+
+#
+# Sample page
+#
+GenerateBarcode = Generate Barcode
+BarCodeDataForReception = Barcode data from reception:
+BarcodeSheetGenerated = Barcode sheet generated
+BarcodePrinted = Barcode label(s) printed
+OnlyOneGeneratorTypeAllowed = Only one type of generator allowed
+printer = Printer
+NumberOfStickersZpl = Number of labels to print
+
+#
+# hooks
+#
+producible = Producible
+ValidatedProducible = Validated and producible
+InprogressProducible = In progress and producible
+ValidatedPartlyProducible = Validated partly producible
+InprogressPartlyProducible = In progress partly producible
+ValidatedNotProducible = Validated not producible
+InprogressNotProducible = In progress not producible
+GenerateDocZip = Generate documents
+documented = Documented
+DefaultDocs = Default documents
+Docs = Documents
+NoDocuments = No Documents for making zip
+NoProducedDocumentForBatch = No documents for produced lot %s
+NoConsumedDocumentForBatch = No documents for consumed lot %s
+NoLines = No lines for making zip
+OnlyDefaultProducedDocumentForBatch = Only default document %s for produced lot %s
+OnlyDefaultConsumedDocumentForBatch = Only default document %s for consumed lot %s
+LotDocsOnBothRefAndId = Documents are located both on lot ref and id location
+LotDocsOnBothRefAndIdMesg = Documents are located both on lot ref and id location for lot %s
+DocumentZipGenerated = Documents zip generated
+
+#
+# Sample widget
+#
+MyWidget = My widget
+MyWidgetDescription = My widget description
+
+#
+# triggers
+#
+UnknownProject = Unknown project reference

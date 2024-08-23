@@ -1,0 +1,309 @@
+<?php
+
+namespace Zpl;
+
+use Zpl\Commands\Exception;
+
+abstract class AbstractBuilder
+{
+    /**
+     *
+     * @var string
+     */
+    protected $unit = 'dots';
+    
+    /**
+     * Current position of X coordinate in user unit
+     *
+     * @var float
+     */
+    protected $x = 0;
+    
+    /**
+     * Current position Y coordinate in user unit
+     *
+     * @var float
+     */
+    protected $y = 0;
+    
+    protected $margin = 0;
+    
+    protected $height = 0;
+    
+    protected $width = 0;
+    
+    const UNIT_DOTS = 'dots';
+    const UNIT_MM   = 'mm';
+    
+    /**
+     *
+     * @param string  $unit
+     *
+     * @throws BuilderException
+     */
+    public function __construct(string $unit = 'dots')
+    {
+        if ($this->verifyUnit($unit) === true) {
+            $this->unit = $unit;
+        } else {
+            throw new BuilderException('Unit ' . $unit . ' not recognized. Please use one of the constants of the class.');
+        }
+    }
+    
+    /**
+     *
+     * @param string $font The font number on the printer
+     * @param float  $size The font's size in pt
+     */
+    abstract public function setFont(string $font, float $size) : void;
+    
+    /**
+     * Insert a text into the document.
+     *
+     * @param float  $x    X position in user units
+     * @param float  $y    Y position in user units
+     * @param string $text Text to be inserted
+     * @param string $orientation The text orientation. Available options:
+     *                            N = normal
+     *                            R = rotated 90 degrees
+     *                            I = inverted 180 degrees
+     *                            B = bottom-up 270 degrees, read from bottom up
+     * @param bool   $invert Invert the color based on the background behind the text
+     */
+    abstract public function drawText(float $x, float $y, string $text, string $orientation = 'N', bool $invert = false) : void;
+    
+    /**
+     *
+     * @param float  $x1        X1 position in user units
+     * @param float  $y1        Y1 position in user units
+     * @param float  $x2        X2 position in user units
+     * @param float  $y2        Y2 position in user units
+     * @param float  $thickness Thickness in user units
+     * @param string $color     'B' for black or 'W' for white
+     * @param bool   $invert    Invert the color based on the background behind the text
+     */
+    abstract public function drawLine(
+        float $x1,
+        float $y1,
+        float $x2,
+        float $y2,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void;
+    
+    /**
+     *
+     * @param float  $x         X position in user units
+     * @param float  $y         Y position in user units
+     * @param float  $width     width of the rectangle in user units
+     * @param float  $height    height of the rectangle in user units
+     * @param float  $thickness Thickness in user units or 0 for the default thickness
+     * @param string $color     'B' for black or 'W' for white
+     * @param float  $round     0 (no rounding) to 8 (heaviest rounding)
+     * @param bool   $invert Invert the color based on the background behind the text
+     */
+    abstract public function drawRect(
+        float $x,
+        float $y,
+        float $width,
+        float $height,
+        float $thickness = 0,
+        string $color = 'B',
+        float $round = 0,
+        bool $invert = false
+    ) : void;
+    
+    /**
+     *
+     * @param float  $width  width of the cell in user units
+     * @param float  $height height of the cell in user units
+     * @param string $text   Text to be drawn
+     * @param bool   $border Whether the cell have a border or not
+     * @param bool   $ln     Whether to advance the X, Y coordinates to the next line
+     * @param string $align  Alignment of the text inside the cell (L = left, C = center, R = right, J = justified)
+     */
+    abstract public function drawCell(
+        float $width,
+        float $height,
+        string $text,
+        bool $border = false,
+        bool $ln = false,
+        string $align = ''
+    ) : void;
+
+    /**
+    *
+    * @param float  $x         X position in user units
+    * @param float  $y         Y position in user units
+    * @param float  $diameter  diameter of the circle in user units
+    * @param float  $thickness Thickness in user units or 0 for the default thickness
+    * @param string $color     'B' for black or 'W' for white
+    * @param bool   $invert Invert the color based on the background behind the text
+    */
+    abstract public function drawCircle(
+        float $x,
+        float $y,
+        float $diameter,
+        float $thickness = 0,
+        string $color = 'B',
+        bool $invert = false
+    ) : void;
+
+    /**
+     * @param float  $x         X position in user units
+     * @param float  $y         Y position in user units
+     * @param float  $width     width for align
+     * @param float  $height    height of the barcode in user units
+     * @param string $data      Data to draw the barcode
+     * @param bool   $printData Whether to print the data or not
+     * @param string $orientation orientation 'N', 'R', 'I' or 'B'
+     * @param string $align  Alignment of the text inside the cell (L = left, C = center)
+     */
+    abstract public function drawCode128(float $x, float $y, float $width, float $height, string $data, bool $printData = false, string $orientation = 'N', string $align = '') : void;
+    
+    /**
+     *
+     * @param float  $x      X position in user units
+     * @param float  $y      Y position in user units
+     * @param string $data   Data to draw the barcode
+     * @param int    $size   The size of the QR Code (1 to 10)
+     */
+    abstract public function drawQrCode(float $x, float $y, string $data, int $size = 10) : void;
+
+    /**
+     * @param float  $x         X position in user units
+     * @param float  $y         Y position in user units
+     * @param float  $width     width for align
+     * @param float  $height    height of the barcode in user units
+     * @param string $data      Data to draw the barcode
+     * @param bool   $printData Whether to print the data or not
+     * @param string $orientation orientation 'N', 'R', 'I' or 'B'
+     * @param string $align  Alignment of the text inside the cell (L = left, C = center)
+     */
+    abstract public function drawEAN13(float $x, float $y, float $width, float $height, string $data, bool $printData = false, string $orientation = 'N', string $align = '') : void;
+
+    /**
+     *
+     * @param float  $x      X position in user units
+     * @param float  $y      Y position in user units
+     * @param string $image  Filename of the image to draw
+     * @param int    $width  Width of the image to be added
+     *
+     * @throws Exception
+     */
+    abstract public function drawGraphic(float $x, float $y, string $image, int $width) : void;
+
+    abstract public function newPage() : void;
+    
+    /**
+     * Verify if the $unit is valid.
+     *
+     * @param string $unit
+     *
+     * @return bool true if the unit is valid, false otherwise.
+     * @throws \Exception
+     */
+    protected function verifyUnit(string $unit) : bool
+    {
+        $r = new \ReflectionClass('\Zpl\AbstractBuilder');
+        $constants = $r->getConstants();
+        $key = array_search($unit, $constants);
+        if (preg_match('/UNIT/', $key)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     *
+     * @param float $x
+     * @param float $y
+     */
+    public function setXY(float $x, float $y) : void
+    {
+        $this->x = $x;
+        $this->y = $y;
+    }
+    
+    /**
+     *
+     * @param float $x
+     */
+    public function setX(float $x) : void
+    {
+        $this->x = $x;
+    }
+    
+    /**
+     *
+     * @return float
+     */
+    public function getX() : float
+    {
+        return $this->x;
+    }
+    
+    /**
+     *
+     * @param float $y
+     */
+    public function setY($y) : void
+    {
+        $this->y = $y;
+    }
+    
+    /**
+     *
+     * @return float
+     */
+    public function getY() : float
+    {
+        return $this->y;
+    }
+    
+    /**
+     *
+     * @param float $margin
+     */
+    public function setMargin(float $margin) : void
+    {
+        $this->margin = $margin;
+    }
+    
+    /**
+     *
+     * @return float
+     */
+    public function getMargin() : float
+    {
+        return $this->margin;
+    }
+    
+    public function setHeight(float $height) : void
+    {
+        $this->height = $height;
+    }
+    
+    public function setWidth(float $width) : void
+    {
+        $this->width = $width;
+    }
+    
+    public function getHeight() : float
+    {
+        return $this->height;
+    }
+    
+    public function getWidth() : float
+    {
+        return $this->width;
+    }
+    
+    public function setPageSize(float $height, float $width) : void
+    {
+        $this->setHeight($height);
+        $this->setWidth($width);
+    }
+}

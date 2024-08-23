@@ -1,0 +1,102 @@
+[
+    {
+        "name": "andersonls/zpl",
+        "version": "v0.0.5",
+        "version_normalized": "0.0.5.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/andersonls/zpl.git",
+            "reference": "0b951ea0e4545baa642a95e8502c7ef920cca130"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/andersonls/zpl/zipball/0b951ea0e4545baa642a95e8502c7ef920cca130",
+            "reference": "0b951ea0e4545baa642a95e8502c7ef920cca130",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=7.2"
+        },
+        "require-dev": {
+            "ext-gd": "*"
+        },
+        "suggest": {
+            "ext-gd": "*"
+        },
+        "time": "2022-05-26T14:41:46+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Zpl\\": "src/"
+            },
+            "psr-4": {
+                "Zpl\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "GPL-3.0-or-later"
+        ],
+        "authors": [
+            {
+                "name": "Anderson Luiz Silvério",
+                "email": "andersonlsilverio@gmail.com"
+            }
+        ],
+        "description": " This library is a php wrapper for the ZPL Programming Language.",
+        "homepage": "https://github.com/andersonls/zpl",
+        "keywords": [
+            "php-wrapper",
+            "zpl"
+        ]
+    },
+    {
+        "name": "ayeo/gs1_barcode",
+        "version": "1.0.3",
+        "version_normalized": "1.0.3.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/ayeo/gs1_128.git",
+            "reference": "d478e876ea057b4e9b5714374d350d7b9ae8e759"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ayeo/gs1_128/zipball/d478e876ea057b4e9b5714374d350d7b9ae8e759",
+            "reference": "d478e876ea057b4e9b5714374d350d7b9ae8e759",
+            "shasum": ""
+        },
+        "require": {
+            "ext-gd": "*",
+            "php": ">=5.4.0"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~4.8"
+        },
+        "time": "2020-09-14T19:34:08+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Ayeo\\Barcode\\": "src//"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "ayeo",
+                "email": "me@ayeo.pl",
+                "homepage": "http://ayeo.pl"
+            }
+        ],
+        "description": "Generate GS1-128 standard barcode",
+        "keywords": [
+            "barcode",
+            "gs1",
+            "gs1-128"
+        ]
+    }
+]
