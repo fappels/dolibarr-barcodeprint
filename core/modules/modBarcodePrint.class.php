@@ -407,6 +407,7 @@ class modBarcodePrint extends DolibarrModules
 	{
 		global $conf;
 
+		$db = $this->db; // needed for load format_cards.lib
 		include DOL_DOCUMENT_ROOT . '/core/lib/format_cards.lib.php';
 		$result = $this->_load_tables('/barcodeprint/sql/');
 		if ($result < 0) {
