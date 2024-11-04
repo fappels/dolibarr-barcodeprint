@@ -67,109 +67,13 @@ if ($action == 'builddoc') {
 		}
 
 		if ($modellabel == 'ZPL_76174') {
-			$productLabel->template = 'barcodeprintzebralabel';
-			if (!empty($productLabel->batch)) {
-				if (!empty($conf->global->BARCODEPRINT_DATAMATRIX_MODE)) {
-					// DATAMATRIX GS1
-					$productLabel->textforright = $productLabel->barcode . '\n' . $productLabel->batch;
-					if ($productLabel->qty > 0) $textforright .= '\n' . $productLabel->qty;
-					$productLabel->textforleft = '_1010' . $productLabel->barcode . '10' . $productLabel->batch;
-					if ($productLabel->qty > 0) $textforleft .= '_137' . (int) $productLabel->qty;
-					$productLabel->encoding = 'DATAMATRIX';
-				} else {
-					// GS1-128 code 128
-					$productLabel->textforright = '';
-					$productLabel->textforleft = '>;>8010' . $productLabel->barcode . '>810>6' . $productLabel->batch;
-					$productLabel->encoding = 'C-128';
-				}
-			} else {
-				// EAN code
-				$productLabel->textforright = '';
-				$productLabel->textforleft = substr($productLabel->barcode, 0, 12); // checksum made by zpl
-				$productLabel->encoding = 'EAN-13';
-			}
+			$productLabel->buildZplBarcode($conf->global->BARCODEPRINT_DATAMATRIX_MODE);
 		} elseif (!empty($productLabel->batch)) {
-			// generate GS1-128 barcode
-			$productLot = new Productlot($db);
-			$productLot->fetch(0, $productLabel->id, $productLabel->batch);
-			if ($productLot->id > 0) {
-				$productLabel->photoFileName = $productLabel->createLotBarcodeFile($productLot);
-			} else {
-				$error++;
-				setEventMessages('Failed to get lot information ' . $productLot->error, $productLot->errors, 'errors');
-				break;
-			}
-			$productLabel->encoding = '';
-			$productLabel->template = 'barcodeprintstandardlabel';
-			$productLabel->textforleft = '';
-			$productLabel->textforright = '%PHOTO%';  // Photo will be barcode image
+			$productLabel->buildGS1PNGBarcode();
 		} elseif (!empty($conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR) && $conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR == 'tcpdf') {
-			// generate tcpdf barcode
-
-			$generator = 'tcpdfbarcode'; // coder (loaded by fetch_barcode). Engine.
-			$productLabel->encoding = strtoupper($productLabel->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
-
-			// Generate barcode
-			$dirbarcode = array_merge(array("/core/modules/barcode/doc/"), $conf->modules_parts['barcode']);
-
-			foreach ($dirbarcode as $reldir) {
-				$dir = dol_buildpath($reldir, 0);
-				$newdir = dol_osencode($dir);
-
-				// Check if directory exists (we do not use dol_is_dir to avoid loading files.lib.php)
-				if (!is_dir($newdir)) {
-					continue;
-				}
-
-				$result = @include_once $newdir . $generator . '.modules.php';
-				if ($result) {
-					break;
-				}
-			}
-
-			// Load barcode class for generating barcode image
-			$classname = "mod" . ucfirst($generator);
-			$module = new $classname($db);
-			$productLabel->encoding = $module->getTcpdfEncodingType($encoding); //convert to TCPDF compatible encoding types
-			$productLabel->is2d = $module->is2d;
-			$productLabel->template = 'barcodeprinttcpdflabel';
-			$productLabel->textforleft = '';
-			$productLabel->textforright = '%BARCODE%';  // %BARCODE% posible when using TCPDF generator
+			$productLabel->buildTCPDFBarcode();
 		} else {
-			// generate standard barcode
-			$generator = 'phpbarcode'; // coder (loaded by fetch_barcode). Engine.
-			$productLabel->encoding = strtoupper($productLabel->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
-
-			// Generate barcode
-			$dirbarcode = array_merge(array("/core/modules/barcode/doc/"), $conf->modules_parts['barcode']);
-
-			foreach ($dirbarcode as $reldir) {
-				$dir = dol_buildpath($reldir, 0);
-				$newdir = dol_osencode($dir);
-
-				// Check if directory exists (we do not use dol_is_dir to avoid loading files.lib.php)
-				if (!is_dir($newdir)) {
-					continue;
-				}
-
-				$result = @include_once $newdir . $generator . '.modules.php';
-				if ($result) {
-					break;
-				}
-			}
-
-			// Load barcode class for generating barcode image
-			$classname = "mod" . ucfirst($generator);
-			$module = new $classname($db);
-			$productLabel->photoFileName = $conf->barcode->dir_temp . '/barcode_' . $productLabel->barcode . '_' . $encoding . '.png';
-			$result = $module->writeBarCode($productLabel->barcode, $encoding);
-			if ($result < 0) {
-				$photoFileName = '';
-			}
-			$productLabel->template = 'barcodeprintstandardlabel';
-			$productLabel->textforleft = '';
-			$productLabel->textforright = '%PHOTO%';  // Photo will be barcode image
-			$productLabel->scale = 0.8;
+			$productLabel->buildStandardBarcode();
 		}
 
 		if (!empty($photoFileName) || $productLabel->template == 'barcodeprinttcpdflabel' || $productLabel->template == 'barcodeprintzebralabel') {

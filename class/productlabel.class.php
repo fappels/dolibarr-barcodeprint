@@ -149,6 +149,122 @@ class ProductLabel extends Product
 		return $destfull;
 	}
 
+	public function buildZplBarcode($dataMatrixmode)
+	{
+		$this->template = 'barcodeprintzebralabel';
+		if (!empty($this->batch)) {
+			if (!empty($dataMatrixmode)) {
+				// DATAMATRIX GS1
+				$this->textforright = $this->barcode . '\n' . $this->batch;
+				if ($this->qty > 0) $this->textforright .= '\n' . $this->qty;
+				$this->textforleft = '_1010' . $this->barcode . '10' . $this->batch;
+				if ($this->qty > 0) $this->textforleft .= '_137' . (int) $this->qty;
+				$this->encoding = 'DATAMATRIX';
+			} else {
+				// GS1-128 code 128
+				$this->textforright = '';
+				$this->textforleft = '>;>8010' . $this->barcode . '>810>6' . $this->batch;
+				$this->encoding = 'C-128';
+			}
+		} else {
+			// EAN code
+			$this->textforright = '';
+			$this->textforleft = substr($this->barcode, 0, 12); // checksum made by zpl
+			$this->encoding = 'EAN-13';
+		}
+	}
+
+	public function buildGS1PNGBarcode()
+	{
+		// generate GS1-128 barcode
+		$productLot = new Productlot($this->db);
+		$productLot->fetch(0, $this->id, $this->batch);
+		if ($productLot->id > 0) {
+			$this->photoFileName = $this->createLotBarcodeFile($productLot);
+		}
+		$this->encoding = '';
+		$this->template = 'barcodeprintstandardlabel';
+		$this->textforleft = '';
+		$this->textforright = '%PHOTO%';  // Photo will be barcode image
+	}
+
+	public function buildTCPDFBarcode()
+	{
+		global $conf;
+
+		// generate tcpdf barcode
+
+		$generator = 'tcpdfbarcode'; // coder (loaded by fetch_barcode). Engine.
+		$this->encoding = strtoupper($this->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
+
+		// Generate barcode
+		$dirbarcode = array_merge(array("/core/modules/barcode/doc/"), $conf->modules_parts['barcode']);
+
+		foreach ($dirbarcode as $reldir) {
+			$dir = dol_buildpath($reldir, 0);
+			$newdir = dol_osencode($dir);
+
+			// Check if directory exists (we do not use dol_is_dir to avoid loading files.lib.php)
+			if (!is_dir($newdir)) {
+				continue;
+			}
+
+			$result = @include_once $newdir . $generator . '.modules.php';
+			if ($result) {
+				break;
+			}
+		}
+
+		// Load barcode class for generating barcode image
+		$classname = "mod" . ucfirst($generator);
+		$module = new $classname($this->db);
+		$this->encoding = $module->getTcpdfEncodingType($this->encoding); //convert to TCPDF compatible encoding types
+		$this->is2d = $module->is2d;
+		$this->template = 'barcodeprinttcpdflabel';
+		$this->textforleft = '';
+		$this->textforright = '%BARCODE%';  // %BARCODE% posible when using TCPDF generator
+	}
+
+	public function buildStandardBarcode()
+	{
+		global $conf;
+
+		// generate standard barcode
+		$generator = 'phpbarcode'; // coder (loaded by fetch_barcode). Engine.
+		$this->encoding = strtoupper($this->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
+
+		// Generate barcode
+		$dirbarcode = array_merge(array("/core/modules/barcode/doc/"), $conf->modules_parts['barcode']);
+
+		foreach ($dirbarcode as $reldir) {
+			$dir = dol_buildpath($reldir, 0);
+			$newdir = dol_osencode($dir);
+
+			// Check if directory exists (we do not use dol_is_dir to avoid loading files.lib.php)
+			if (!is_dir($newdir)) {
+				continue;
+			}
+
+			$result = @include_once $newdir . $generator . '.modules.php';
+			if ($result) {
+				break;
+			}
+		}
+
+		// Load barcode class for generating barcode image
+		$classname = "mod" . ucfirst($generator);
+		$module = new $classname($db);
+		$this->photoFileName = $conf->barcode->dir_temp . '/barcode_' . $this->barcode . '_' . $encoding . '.png';
+		$result = $module->writeBarCode($this->barcode, $this->encoding);
+		if ($result < 0) {
+			$this->photoFileName = '';
+		}
+		$this->template = 'barcodeprintstandardlabel';
+		$this->textforleft = '';
+		$this->textforright = '%PHOTO%';  // Photo will be barcode image
+		$this->scale = 0.8;
+	}
+
 	public function buildLabelTemplate()
 	{
 		global $conf, $mysoc, $user, $langs;
