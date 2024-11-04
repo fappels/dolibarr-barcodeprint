@@ -36,7 +36,27 @@ class ProductLabel extends Product
 	/**
 	 * @var int $numberofsticker number of labels to print
 	 */
-	public $numberofsticker;
+	public $numberofsticker = 1;
+
+	public $template;
+
+	public $scale;
+
+	public $textforleft;
+
+	public $textforright;
+
+	public $encoding;
+
+	public $is2d;
+
+	public $photoFileName;
+
+	public $year;
+
+	public $month;
+
+	public $day;
 
 	/**
 	 * create product lot barcode png file
@@ -127,5 +147,58 @@ class ProductLabel extends Product
 			addFileIntoDatabaseIndex($upload_dir, basename($destfile), '', 'generated', 0, $productLot);
 		}
 		return $destfull;
+	}
+
+	public function buildLabelTemplate()
+	{
+		global $conf, $mysoc, $user, $langs;
+
+		$arrayofrecords = array();
+		// List of values to scan for a replacement
+		$substitutionarray = array(
+			'%LOGIN%' => $user->login,
+			'%COMPANY%' => $mysoc->name,
+			'%ADDRESS%' => $mysoc->address,
+			'%ZIP%' => $mysoc->zip,
+			'%TOWN%' => $mysoc->town,
+			'%COUNTRY%' => $mysoc->country,
+			'%COUNTRY_CODE%' => $mysoc->country_code,
+			'%EMAIL%' => $mysoc->email,
+			'%YEAR%' => $this->year,
+			'%MONTH%' => $this->month,
+			'%DAY%' => $this->day,
+			'%DOL_MAIN_URL_ROOT%' => DOL_MAIN_URL_ROOT,
+			'%SERVER%' => "http://" . $_SERVER["SERVER_NAME"] . "/",
+			'%PRODUCTREF%' => $this->ref,
+			'%PRODUCTLABEL%' => $this->label,
+			'%PRODUCTPRICE%' => $this->price,
+			'%PRODUCTPRICETTC%' => $this->price_ttc,
+			'%BR%' => chr(10),
+		);
+		complete_substitutions_array($substitutionarray, $langs);
+
+		$textleft = make_substitutions($this->textforleft, $substitutionarray);
+		$textheader = make_substitutions((empty($conf->global->BARCODE_LABEL_HEADER_TEXT) ? '' : $conf->global->BARCODE_LABEL_HEADER_TEXT), $substitutionarray);
+		$textfooter = make_substitutions((empty($conf->global->BARCODE_LABEL_FOOTER_TEXT) ? '' : $conf->global->BARCODE_LABEL_FOOTER_TEXT), $substitutionarray);
+		$textright = make_substitutions($this->textforright, $substitutionarray);
+		$forceimgscalewidth = (empty($conf->global->BARCODE_FORCEIMGSCALEWIDTH) ? $this->scale : $conf->global->BARCODE_FORCEIMGSCALEWIDTH);
+		$forceimgscaleheight = (empty($conf->global->BARCODE_FORCEIMGSCALEHEIGHT) ? $this->scale : $conf->global->BARCODE_FORCEIMGSCALEHEIGHT);
+
+		for ($i = 0; $i < $this->numberofsticker; $i++) {
+			$arrayofrecords[$this->template][] = array(
+				'textleft' => $textleft,
+				'textheader' => $textheader,
+				'textfooter' => $textfooter,
+				'textright' => $textright,
+				'code' => $this->barcode,
+				'encoding' => $this->encoding,
+				'is2d' => $this->is2d,
+				'photo' => $this->photoFileName,
+				'imgscalewidth' => $forceimgscalewidth,
+				'imgscaleheight' => $forceimgscaleheight
+			);
+		}
+
+		return $arrayofrecords;
 	}
 }

@@ -48,10 +48,9 @@ if ($action == 'builddoc') {
 			$error++;
 			break;
 		} else {
-			$code = $productLabel->barcode;
-			$is2d = false;
-			$scale = 1;
-			$photoFileName = '';
+			$productLabel->is2d = false;
+			$productLabel->scale = 1;
+			$productLabel->photoFileName = '';
 		}
 		// barcode type = barcode encoding
 		if (empty($productLabel->barcode_type)) {
@@ -60,58 +59,55 @@ if ($action == 'builddoc') {
 			break;
 		}
 
-		// Get encoder (barcode_type_coder) from barcode type id (barcode_type)
-		$stdobject = new GenericObject($db);
-		$stdobject->barcode_type = $productLabel->barcode_type;
-		$result = $stdobject->fetch_barcode();
+		$result = $productLabel->fetch_barcode();
 		if ($result <= 0) {
 			$error++;
-			setEventMessages('Failed to get bar code type information ' . $stdobject->error, $stdobject->errors, 'errors');
+			setEventMessages('Failed to get bar code type information ' . $productLabel->error, $productLabel->errors, 'errors');
 			break;
 		}
 
 		if ($modellabel == 'ZPL_76174') {
-			$template = 'barcodeprintzebralabel';
+			$productLabel->template = 'barcodeprintzebralabel';
 			if (!empty($productLabel->batch)) {
 				if (!empty($conf->global->BARCODEPRINT_DATAMATRIX_MODE)) {
 					// DATAMATRIX GS1
-					$textforright = $productLabel->barcode . '\n' . $productLabel->batch;
+					$productLabel->textforright = $productLabel->barcode . '\n' . $productLabel->batch;
 					if ($productLabel->qty > 0) $textforright .= '\n' . $productLabel->qty;
-					$textforleft = '_1010' . $productLabel->barcode . '10' . $productLabel->batch;
+					$productLabel->textforleft = '_1010' . $productLabel->barcode . '10' . $productLabel->batch;
 					if ($productLabel->qty > 0) $textforleft .= '_137' . (int) $productLabel->qty;
-					$encoding = 'DATAMATRIX';
+					$productLabel->encoding = 'DATAMATRIX';
 				} else {
 					// GS1-128 code 128
-					$textforright = '';
-					$textforleft = '>;>8010' . $productLabel->barcode . '>810>6' . $productLabel->batch;
-					$encoding = 'C-128';
+					$productLabel->textforright = '';
+					$productLabel->textforleft = '>;>8010' . $productLabel->barcode . '>810>6' . $productLabel->batch;
+					$productLabel->encoding = 'C-128';
 				}
 			} else {
 				// EAN code
-				$textforright = '';
-				$textforleft = substr($productLabel->barcode, 0, 12); // checksum made by zpl
-				$encoding = 'EAN-13';
+				$productLabel->textforright = '';
+				$productLabel->textforleft = substr($productLabel->barcode, 0, 12); // checksum made by zpl
+				$productLabel->encoding = 'EAN-13';
 			}
 		} elseif (!empty($productLabel->batch)) {
 			// generate GS1-128 barcode
 			$productLot = new Productlot($db);
 			$productLot->fetch(0, $productLabel->id, $productLabel->batch);
 			if ($productLot->id > 0) {
-				$photoFileName = $productLabel->createLotBarcodeFile($productLot);
+				$productLabel->photoFileName = $productLabel->createLotBarcodeFile($productLot);
 			} else {
 				$error++;
 				setEventMessages('Failed to get lot information ' . $productLot->error, $productLot->errors, 'errors');
 				break;
 			}
-			$encoding = '';
-			$template = 'barcodeprintstandardlabel';
-			$textforleft = '';
-			$textforright = '%PHOTO%';  // Photo will be barcode image
+			$productLabel->encoding = '';
+			$productLabel->template = 'barcodeprintstandardlabel';
+			$productLabel->textforleft = '';
+			$productLabel->textforright = '%PHOTO%';  // Photo will be barcode image
 		} elseif (!empty($conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR) && $conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR == 'tcpdf') {
 			// generate tcpdf barcode
 
 			$generator = 'tcpdfbarcode'; // coder (loaded by fetch_barcode). Engine.
-			$encoding = strtoupper($stdobject->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
+			$productLabel->encoding = strtoupper($productLabel->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
 
 			// Generate barcode
 			$dirbarcode = array_merge(array("/core/modules/barcode/doc/"), $conf->modules_parts['barcode']);
@@ -134,15 +130,15 @@ if ($action == 'builddoc') {
 			// Load barcode class for generating barcode image
 			$classname = "mod" . ucfirst($generator);
 			$module = new $classname($db);
-			$encoding = $module->getTcpdfEncodingType($encoding); //convert to TCPDF compatible encoding types
-			$is2d = $module->is2d;
-			$template = 'barcodeprinttcpdflabel';
-			$textforleft = '';
-			$textforright = '%BARCODE%';  // %BARCODE% posible when using TCPDF generator
+			$productLabel->encoding = $module->getTcpdfEncodingType($encoding); //convert to TCPDF compatible encoding types
+			$productLabel->is2d = $module->is2d;
+			$productLabel->template = 'barcodeprinttcpdflabel';
+			$productLabel->textforleft = '';
+			$productLabel->textforright = '%BARCODE%';  // %BARCODE% posible when using TCPDF generator
 		} else {
 			// generate standard barcode
 			$generator = 'phpbarcode'; // coder (loaded by fetch_barcode). Engine.
-			$encoding = strtoupper($stdobject->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
+			$productLabel->encoding = strtoupper($productLabel->barcode_type_code); // code (loaded by fetch_barcode). Example 'ean', 'isbn', ...
 
 			// Generate barcode
 			$dirbarcode = array_merge(array("/core/modules/barcode/doc/"), $conf->modules_parts['barcode']);
@@ -165,62 +161,19 @@ if ($action == 'builddoc') {
 			// Load barcode class for generating barcode image
 			$classname = "mod" . ucfirst($generator);
 			$module = new $classname($db);
-			$photoFileName = $conf->barcode->dir_temp . '/barcode_' . $code . '_' . $encoding . '.png';
-			$result = $module->writeBarCode($code, $encoding);
+			$productLabel->photoFileName = $conf->barcode->dir_temp . '/barcode_' . $productLabel->barcode . '_' . $encoding . '.png';
+			$result = $module->writeBarCode($productLabel->barcode, $encoding);
 			if ($result < 0) {
 				$photoFileName = '';
 			}
-			$template = 'barcodeprintstandardlabel';
-			$textforleft = '';
-			$textforright = '%PHOTO%';  // Photo will be barcode image
-			$scale = 0.8;
+			$productLabel->template = 'barcodeprintstandardlabel';
+			$productLabel->textforleft = '';
+			$productLabel->textforright = '%PHOTO%';  // Photo will be barcode image
+			$productLabel->scale = 0.8;
 		}
 
-		if (!empty($photoFileName) || $template == 'barcodeprinttcpdflabel' || $template == 'barcodeprintzebralabel') {
-			// List of values to scan for a replacement
-			$substitutionarray = array(
-				'%LOGIN%' => $user->login,
-				'%COMPANY%' => $mysoc->name,
-				'%ADDRESS%' => $mysoc->address,
-				'%ZIP%' => $mysoc->zip,
-				'%TOWN%' => $mysoc->town,
-				'%COUNTRY%' => $mysoc->country,
-				'%COUNTRY_CODE%' => $mysoc->country_code,
-				'%EMAIL%' => $mysoc->email,
-				'%YEAR%' => $year,
-				'%MONTH%' => $month,
-				'%DAY%' => $day,
-				'%DOL_MAIN_URL_ROOT%' => DOL_MAIN_URL_ROOT,
-				'%SERVER%' => "http://" . $_SERVER["SERVER_NAME"] . "/",
-				'%PRODUCTREF%' => $productLabel->ref,
-				'%PRODUCTLABEL%' => $productLabel->label,
-				'%PRODUCTPRICE%' => $productLabel->price,
-				'%PRODUCTPRICETTC%' => $productLabel->price_ttc,
-				'%BR%' => chr(10),
-			);
-			complete_substitutions_array($substitutionarray, $langs);
-
-			$textleft = make_substitutions($textforleft, $substitutionarray);
-			$textheader = make_substitutions((empty($conf->global->BARCODE_LABEL_HEADER_TEXT) ? '' : $conf->global->BARCODE_LABEL_HEADER_TEXT), $substitutionarray);
-			$textfooter = make_substitutions((empty($conf->global->BARCODE_LABEL_FOOTER_TEXT) ? '' : $conf->global->BARCODE_LABEL_FOOTER_TEXT), $substitutionarray);
-			$textright = make_substitutions($textforright, $substitutionarray);
-			$forceimgscalewidth = (empty($conf->global->BARCODE_FORCEIMGSCALEWIDTH) ? $scale : $conf->global->BARCODE_FORCEIMGSCALEWIDTH);
-			$forceimgscaleheight = (empty($conf->global->BARCODE_FORCEIMGSCALEHEIGHT) ? $scale : $conf->global->BARCODE_FORCEIMGSCALEHEIGHT);
-
-			for ($i = 0; $i < $productLabel->numberofsticker; $i++) {
-				$arrayofrecords[$template][] = array(
-					'textleft' => $textleft,
-					'textheader' => $textheader,
-					'textfooter' => $textfooter,
-					'textright' => $textright,
-					'code' => $code,
-					'encoding' => $encoding,
-					'is2d' => $is2d,
-					'photo' => $photoFileName,
-					'imgscalewidth' => $forceimgscalewidth,
-					'imgscaleheight' => $forceimgscaleheight
-				);
-			}
+		if (!empty($photoFileName) || $productLabel->template == 'barcodeprinttcpdflabel' || $productLabel->template == 'barcodeprintzebralabel') {
+			$arrayofrecords = $productLabel->buildLabelTemplate();
 		}
 	}
 
