@@ -41,6 +41,7 @@ if ($action == 'builddoc') {
 	$error = 0;
 	$arrayofrecords = array();
 	foreach ($productLabels as $productLabel) {
+		/** @var ProductLabel $productLabel */
 		// barcode value
 		if (empty($productLabel->barcode)) {
 			setEventMessages($langs->trans("ErrorFieldRequired", $productLabel->ref . ' ' . $langs->transnoentitiesnoconv("BarcodeValue")), null, 'errors');
@@ -74,21 +75,21 @@ if ($action == 'builddoc') {
 			if (!empty($productLabel->batch)) {
 				if (!empty($conf->global->BARCODEPRINT_DATAMATRIX_MODE)) {
 					// DATAMATRIX GS1
-					$textforleft = $productLabel->barcode . '\n' . $productLabel->batch;
-					if ($productLabel->qty > 0) $textforleft .= '\n' . $productLabel->qty;
-					$textforright = '_1010' . $productLabel->barcode . '10' . $productLabel->batch;
-					if ($productLabel->qty > 0) $textforright .= '_137' . (int) $productLabel->qty;
+					$textforright = $productLabel->barcode . '\n' . $productLabel->batch;
+					if ($productLabel->qty > 0) $textforright .= '\n' . $productLabel->qty;
+					$textforleft = '_1010' . $productLabel->barcode . '10' . $productLabel->batch;
+					if ($productLabel->qty > 0) $textforleft .= '_137' . (int) $productLabel->qty;
 					$encoding = 'DATAMATRIX';
 				} else {
 					// GS1-128 code 128
-					$textforleft = '';
-					$textforright = '>;>8010' . $productLabel->barcode . '>810>6' . $productLabel->batch;
+					$textforright = '';
+					$textforleft = '>;>8010' . $productLabel->barcode . '>810>6' . $productLabel->batch;
 					$encoding = 'C-128';
 				}
 			} else {
 				// EAN code
-				$textforleft = '';
-				$textforright = substr($productLabel->barcode, 0, 12); // checksum made by zpl
+				$textforright = '';
+				$textforleft = substr($productLabel->barcode, 0, 12); // checksum made by zpl
 				$encoding = 'EAN-13';
 			}
 		} elseif (!empty($productLabel->batch)) {
@@ -96,7 +97,7 @@ if ($action == 'builddoc') {
 			$productLot = new Productlot($db);
 			$productLot->fetch(0, $productLabel->id, $productLabel->batch);
 			if ($productLot->id > 0) {
-				$photoFileName = createLotBarcodeFile($db, $productLot);
+				$photoFileName = $productLabel->createLotBarcodeFile($productLot);
 			} else {
 				$error++;
 				setEventMessages('Failed to get lot information ' . $productLot->error, $productLot->errors, 'errors');
@@ -253,12 +254,12 @@ if ($action == 'builddoc') {
 						}
 						$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
 						if ($record['encoding'] == 'C-128') {
-							$driver->drawCode128($leftMargin, $topMargin + 8, $width, 10, $record['textright'], true, 'N', 'C');
+							$driver->drawCode128($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
 						}
 						if ($record['encoding'] == 'DATAMATRIX') {
-							$driver->drawDataMatrix($leftMargin + 8, $topMargin + 7, $record['textright'], 6);
+							$driver->drawDataMatrix($leftMargin + 8, $topMargin + 7, $record['textleft'], 6);
 							$driver->SetXY($leftMargin + 16 + 12, $topMargin + 8);
-							$cells = explode('\n', $record['textleft']);
+							$cells = explode('\n', $record['textright']);
 							if (is_array($cells)) {
 								if (count($cells) > 0) {
 									$line = 0;
@@ -268,17 +269,17 @@ if ($action == 'builddoc') {
 										$driver->SetXY($leftMargin + 16 + 12, $topMargin + 8 + $line);
 									}
 								} else {
-									$driver->drawCell(($width / 2), 10, $record['textleft'], false, false, 'L');
+									$driver->drawCell(($width / 2), 10, $record['textright'], false, false, 'L');
 								}
 							}
 						}
 						if ($record['encoding'] == 'EAN-13') {
-							$driver->drawEAN13($leftMargin, $topMargin + 8, $width, 10, $record['textright'], true, 'N', 'C');
+							$driver->drawEAN13($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
 						}
 						$driver->SetXY($leftMargin, $topMargin + 21);
 						$driver->drawCell($width, 10, $record['textfooter'], false, false, 'C');
 
-						if ($conf->global->BARCODEPRINT_ZEBRA_IP) {
+						if (!empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
 							try {
 								\Zpl\Printer::printer($conf->global->BARCODEPRINT_ZEBRA_IP)->send($driver->toZpl());
 								$result = 1;

@@ -73,6 +73,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/modules/printsheet/modules_labels.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/genericobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/reception/class/reception.class.php';
 dol_include_once('/barcodeprint/lib/barcodeprint.lib.php');
+dol_include_once('/barcodeprint/class/productlabel.class.php');
 dol_include_once('/product/stock/class/productlot.class.php');
 
 // Load translation files required by the page
@@ -102,7 +103,7 @@ $zpl_labels = array();
 
 $action = GETPOST('action', 'aZ09');
 
-$producttmp = new Product($db);
+$producttmp = new ProductLabel($db);
 $receptionTmp = new Reception($db);
 $productlotTmp = new Productlot($db);
 $qty = 0;
@@ -147,7 +148,7 @@ if (GETPOST('receptionid') > 0) {
 		if ($line->fk_product > 0) {
 			$price = 0;
 			$price_ttc = 0;
-			$productLine = new Product($db);
+			$productLine = new ProductLabel($db);
 			$productLine->fetch($line->fk_product);
 
 			if (!empty($productLine->barcode) && empty($productLine->array_options['options_deactivate_label'])) {

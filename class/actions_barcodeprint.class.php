@@ -105,127 +105,13 @@ class ActionsBarcodePrint
 		if (in_array($parameters['currentcontext'], array('productlotcard'))) {
 			if (!empty($object->id)) {
 				if ($action == 'generate_barcode') {
-					dol_include_once('/barcodeprint/lib/barcodeprint.lib.php');
+					/** @var ProductLot $object */
+					dol_include_once('/barcodeprint/class/productlabel.class.php');
 					// force to sheet model label generate barcode image
 					$conf->global->BARCODEPRINT_DEFAULT_MODELLABEL = 'L7160';
-					createLotBarcodeFile($this->db, $object);
-				}
-			}
-		}
-		if (in_array($parameters['currentcontext'], array('mocard'))) {
-			if (!empty($object->id)) {
-				if ($action == 'generate_doc_zip') {
-					/**
-					 * Make zip of lot documents
-					 * @var Mo $object Mo object
-					*/
-					$filearrayConsumed = array();
-					$batchConsumed = array();
-					$filearrayProduced = array();
-					$defaultDocs = array('barcode-gs1-128.png');
-					$warnings = array();
-					$makezip = false;
-					if (is_array($object->lines)) {
-						foreach ($object->lines as $line) {
-							if ($line->fk_product > 0 && !empty($line->batch)) {
-								// get consumed and produced product files
-								if (($line->role == 'consumed' || $line->role == 'produced') ) {
-									dol_include_once('/product/stock/class/productlot.class.php');
-									dol_include_once('/core/lib/files.lib.php');
-									// First take old system for document management ( it uses $object->ref)
-									$productLot = new ProductLot($this->db);
-									$result = $productLot->fetch(0, $line->fk_product, $line->batch);
-									$productLot->ref = $productLot->batch;
-									if ($result > 0) {
-										$dir = $conf->productbatch->multidir_output[$productLot->entity].'/'.get_exdir(0, 0, 0, 1, $productLot, 'product_batch');
-										$oldfilearray = dol_dir_list($dir, "files");
-										// then take use new system on lot id.
-										$result = $productLot->fetch(0, $line->fk_product, $line->batch);
-										$dir = $conf->productbatch->multidir_output[$productLot->entity].'/'.get_exdir(0, 0, 0, 1, $productLot, 'product_batch');
-										$newfilearray = dol_dir_list($dir, "files");
-										if (!empty($oldfilearray) && !empty($newfilearray)) $warnings[] = $langs->trans('LotDocsOnBothRefAndIdMesg', $productLot->batch);
-										$filearray = array();
-										foreach ($oldfilearray as $file) {
-											$filearray[] = $file;
-										}
-										foreach ($newfilearray as $file) {
-											$filearray[] = $file;
-										}
-										if ($line->role == 'produced') {
-											$filearrayProduced[$line->id] = $filearray;
-											$batchProduced[$line->id] = $productLot->batch;
-										} else {
-											$filearrayConsumed[$line->id] = $filearray;
-											$batchConsumed[$line->id] = $productLot->batch;
-										}
-									}
-								}
-							}
-						}
-
-						$dir = $conf->mrp->multidir_output[$object->entity ? $object->entity : $conf->entity]."/".get_exdir(0, 0, 0, 1, $object);
-
-						foreach ($filearrayProduced as $produced_key=>$filearray) {
-							if (empty($filearray)) {
-								$warnings[] = $langs->trans('NoProducedDocumentForBatch', $batchProduced[$produced_key]);
-							} else {
-								if (!dol_is_dir($dir.'/documents/produced')) {
-									dol_mkdir($dir.'/documents/produced');
-								}
-								foreach ($filearray as $file) {
-									if (count($filearray) == 1 && in_array($file['name'], $defaultDocs)) $warnings[] = $langs->trans('OnlyDefaultProducedDocumentForBatch', $file['name'], $batchProduced[$produced_key]);
-									if (!in_array($file['name'], $defaultDocs)) {
-										$result = dol_copy($file['fullname'], $dir.'/documents/produced/'.$file['name']);
-										if ($result < 0) {
-											$langs->load("errors");
-											$error++;
-											$errors = $langs->trans("ErrorFailToCopyFile", $file['fullname'], $dir.'/documents/produced/'.$file['name']);
-											break;
-										} else {
-											$makezip = true;
-										}
-									}
-								}
-							}
-						}
-						foreach ($filearrayConsumed as $consumed_key=>$filearray) {
-							if (empty($filearray)) {
-								$warnings[] = $langs->trans('NoConsumedDocumentForBatch', $batchConsumed[$consumed_key]);
-							} else {
-								if (!dol_is_dir($dir.'/documents/consumed/'.$batchConsumed[$consumed_key])) {
-									dol_mkdir($dir.'/documents/consumed/'.$batchConsumed[$consumed_key]);
-								}
-								foreach ($filearray as $file) {
-									if (count($filearray) == 1 && in_array($file['name'], $defaultDocs)) $warnings[] = $langs->trans('OnlyDefaultConsumedDocumentForBatch', $file['name'], $batchConsumed[$consumed_key]);
-									if (!in_array($file['name'], $defaultDocs)) {
-										$result = dol_copy($file['fullname'], $dir.'/documents/consumed/'.$batchConsumed[$consumed_key].'/'.$file['name']);
-										if ($result < 0) {
-											$langs->load("errors");
-											$error++;
-											$errors = $langs->trans("ErrorFailToCopyFile", $file['fullname'], $dir.'/documents/consumed/'.$batchConsumed[$consumed_key].'/'.$file['name']);
-											break;
-										} else {
-											$makezip = true;
-										}
-									}
-								}
-							}
-						}
-						if ($makezip) {
-							$result = dol_compress_dir($dir.'/documents', $dir.'/'.$object->ref.'.zip');
-							if ($result < 0) {
-								$error++;
-								$errors = $langs->trans("ZipFileGeneratedInto", $dir.'/documents.zip');
-							} else {
-								dol_delete_dir_recursive($dir.'/documents');
-							}
-							setEventMessages($langs->trans('DocumentZipGenerated'), null);
-						} else {
-							$warnings[] = $langs->trans('NoDocuments');
-						}
-					} else {
-						$warnings[] = $langs->trans('NoLines');
-					}
+					$product = new ProductLabel($this->db);
+					$product->fetch($object->fk_product);
+					$product->createLotBarcodeFile($object);
 				}
 			}
 		}
@@ -257,15 +143,6 @@ class ActionsBarcodePrint
 
 		if (in_array($parameters['currentcontext'], array('productlotcard'))) {
 			print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=generate_barcode">' . $langs->trans('GenerateBarcode') . '</a></div>';
-		}
-		if (in_array($parameters['currentcontext'], array('mocard'))) {
-			/** @var Mo $object Mo object */
-			if (empty($user->socid)) {
-				print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=presend&mode=init#formmailbeforetitle">' . $langs->trans('SendMail') . '</a></div>';
-			}
-			if ($object->status == Mo::STATUS_PRODUCED) {
-				print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=generate_doc_zip">' . $langs->trans('GenerateDocZip') . '</a></div>';
-			}
 		}
 		return $error;
 	}
