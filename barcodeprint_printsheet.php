@@ -22,10 +22,7 @@
  *    \ingroup    member
  *    \brief        Page to print sheets with barcodes using the document templates into core/modules/printsheets
  */
-// from Dolibarr 13 to avoid token error
-if (!empty($_POST['mode']) && $_POST['mode'] === 'label') {	// Page is called to build a PDF and output, we must ne renew the token.
-	if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', '1');				// Do not roll the Anti CSRF token (used if MAIN_SECURITY_CSRF_WITH_TOKEN is on)
-}
+
 // Load Dolibarr environment
 $res = 0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
@@ -86,7 +83,6 @@ $month = dol_print_date($now, '%m');
 $day = dol_print_date($now, '%d');
 $forbarcode = GETPOST('forbarcode');
 $fk_barcode_type = GETPOST('fk_barcode_type');
-$mode = GETPOST('mode');
 $modellabel = (GETPOST('modellabel') ? GETPOST('modellabel') : $conf->global->BARCODEPRINT_DEFAULT_MODELLABEL); // Doc template to use
 $numberofsticker = GETPOST('numberofsticker', 'int');
 $productid = GETPOST('productid');
@@ -113,6 +109,8 @@ if ($productlotid > 0) {
 	$productid = $productlotTmp->fk_product;
 	$batch = $productlotTmp->batch;
 	if (!empty($productlotTmp->array_options['options_mobilid_countstep'])) $qty = $productlotTmp->array_options['options_mobilid_countstep'];
+
+	$diroutput = $conf->productbatch->multidir_output[!empty($productlotTmp->entity) ? $productlotTmp->entity : $conf->entity]."/".$productlotTmp->id;
 }
 
 if ($productid > 0) {
@@ -128,16 +126,10 @@ if ($productid > 0) {
 	if (!empty($batch)) {
 		$producttmp->batch = $batch;
 		$producttmp->qty = $qty;
+	} else {
+		$diroutput = $conf->product->multidir_output[$producttmp->entity]."/".get_exdir(0, 0, 0, 0, $producttmp, 'product');
 	}
 	$productLabels[] = $producttmp;
-	if (getDolGlobalInt('PRODUCT_USE_OLD_PATH_FOR_PHOTO')) {
-		$pdir = get_exdir($producttmp->id, 2, 0, 0, $producttmp, 'product').$producttmp->id."/photos/";
-		$dir = $conf->product->dir_output.'/'.$pdir;
-	} else {
-		$pdir = get_exdir(0, 0, 0, 0, $producttmp, 'product');
-	}
-
-	$diroutput = $conf->product->dir_output."/".$pdir;
 }
 
 if (GETPOST('receptionid') > 0) {

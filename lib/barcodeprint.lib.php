@@ -20,12 +20,6 @@
  * \ingroup barcodeprint
  * \brief   Library files with common functions for BarcodePrint
  */
-use Ayeo\Barcode;
-
-dol_include_once('/barcodeprint/lib/vendor/autoload.php');
-dol_include_once('/product/stock/class/productlot.class.php');
-dol_include_once('/product/class/product.class.php');
-dol_include_once('/core/lib/files.lib.php');
 
 /**
  * Prepare admin pages header
