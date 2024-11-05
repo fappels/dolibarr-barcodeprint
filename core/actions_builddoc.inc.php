@@ -67,7 +67,8 @@ if ($action == 'builddoc') {
 		}
 
 		if (preg_match('/ZPL/', $modellabel)) {
-			$productLabel->buildZplBarcode($conf->global->BARCODEPRINT_DATAMATRIX_MODE);
+			$dataMatrix = (!empty($conf->global->BARCODEPRINT_DATAMATRIX_MODE) ? $conf->global->BARCODEPRINT_DATAMATRIX_MODE : 0);
+			$productLabel->buildZplBarcode($dataMatrix);
 		} elseif (!empty($productLabel->batch)) {
 			$productLabel->buildGS1PNGBarcode();
 		} elseif (!empty($conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR) && $conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR == 'tcpdf') {

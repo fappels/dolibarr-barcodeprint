@@ -12,21 +12,21 @@ class ZplBuilder extends AbstractBuilder
      * @var array
      */
     protected $commands = array();
-    
+
     /**
      * Commands to be inserted before beginning of ZPL document (^XA)
      *
      * @var array
      */
     protected $preCommands = array();
-    
+
     /**
      * Commands to be inserted after end of ZPL document (^XZ)
      *
      * @var array
      */
     protected $postCommands = array();
-    
+
     /**
      * Resolution of the printer in DPI
      *
@@ -38,9 +38,9 @@ class ZplBuilder extends AbstractBuilder
      * @var Fonts\AbstractMapper
      */
     protected $fontMapper;
-    
+
     const PAGE_SEPARATOR = '%PAGE_SEPARATOR%';
-    
+
     /**
      *
      * @param string  $unit
@@ -53,13 +53,13 @@ class ZplBuilder extends AbstractBuilder
         parent::__construct($unit);
         $this->resolution = $resolution;
     }
-    
+
     /**
      *
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::setFont()
      */
-    public function setFont(string $font, float $size) : void
+    public function setFont(string $font, float $size, ?float $width = null) : void
     {
         $fontMapper = $this->fontMapper;
         $mapper = $fontMapper::$mapper;
@@ -67,9 +67,15 @@ class ZplBuilder extends AbstractBuilder
             $font = $mapper[$font];
         }
         $size = $size * ($this->resolution * 0.014);
-        $this->commands[] = '^CF' . $font . ',' . $size;
+        $command = '^CF' . $font . ',' . $size;
+
+        if ($width !== null) {
+            $width = $width * ($this->resolution * 0.014);
+            $command .= ',' . $width;
+        }
+        $this->commands[] = $command;
     }
-    
+
     /**
      * Value from 0 to 36.
      *
@@ -79,7 +85,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->commands[] = '^CI' . $code;
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -95,7 +101,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^FD' . $text . '^FS';
         $this->commands[] = '^FWN';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -121,7 +127,7 @@ class ZplBuilder extends AbstractBuilder
             $invert
         );
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -163,7 +169,7 @@ class ZplBuilder extends AbstractBuilder
                           . '^GC' . $this->toDots($diameter) . ',' . $thickness . ',' . $color
                           . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -198,7 +204,7 @@ class ZplBuilder extends AbstractBuilder
             $this->setX($x + $width);
         }
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -220,7 +226,7 @@ class ZplBuilder extends AbstractBuilder
         $this->commands[] = '^BC' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,N';
         $this->commands[] = '^FD' . $data . '^FS';
     }
-    
+
     /**
      *
      * {@inheritDoc}
@@ -298,7 +304,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands[] = $command;
     }
-    
+
     /**
      *
      * @param array $commands
@@ -307,7 +313,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->preCommands = $commands;
     }
-    
+
     /**
      *
      * @param string $command
@@ -316,7 +322,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands[] = $command;
     }
-    
+
     /**
      *
      * @param array $commands
@@ -325,7 +331,7 @@ class ZplBuilder extends AbstractBuilder
     {
         $this->postCommands = $commands;
     }
-    
+
     /**
      * Adds a new label
      *
@@ -340,7 +346,7 @@ class ZplBuilder extends AbstractBuilder
         $this->setY(0);
         $this->setX($this->getMargin());
     }
-    
+
     /**
      * Converts the $size from $this->unit to dots
      *
@@ -361,12 +367,12 @@ class ZplBuilder extends AbstractBuilder
         }
         return (int) $sizeInDots;
     }
-    
+
     public function setFontMapper(Fonts\AbstractMapper $mapper) : void
     {
         $this->fontMapper = $mapper;
     }
-    
+
     /**
      * Convert instance to ZPL.
      *
@@ -376,13 +382,13 @@ class ZplBuilder extends AbstractBuilder
     {
         $preCommands = array_merge($this->preCommands, array('^XA'));
         $postCommands = array_merge(array('^XZ'), $this->postCommands, array(''));
-        
+
         $zpl = implode("\&", array_merge($preCommands, $this->commands, $postCommands));
         $commands = implode("\&", array_merge($this->postCommands, $this->preCommands));
         $zpl = str_replace(self::PAGE_SEPARATOR, $commands, $zpl);
         return $zpl;
     }
-    
+
     /**
      * Convert instance to string.
      *
