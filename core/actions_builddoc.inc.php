@@ -85,7 +85,7 @@ if ($action == 'builddoc') {
 	if (!$error) {
 		$mesg = '';
 		// Build and output PDF
-		if ($modellabel == 'ZPL_76174') {
+		if (preg_match('/ZPL/', $modellabel)) {
 			$result = ProductLabel::buildZplLabels($modellabel, $arrayofrecords);
 		} elseif ($diroutput) {
 			$result = ProductLabel::buildPDFLabels($diroutput, $modellabel, $arrayofrecords);
