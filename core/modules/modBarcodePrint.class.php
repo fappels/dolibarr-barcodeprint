@@ -472,6 +472,15 @@ class modBarcodePrint extends DolibarrModules
 				"INSERT INTO `llx_c_format_cards` (`rowid`,`code`,`name`,`paper_size`,`orientation`,`metric`,`leftmargin`,`topmargin`,`nx`,`ny`,`spacex`,`spacey`,`width`,`height`,`font_size`,`custom_x`,`custom_y`,`active`) VALUES ($this->numero + $r,'ZPL_76174','Zebra-76174','custom','L','mm',0.15000000,0.15000000,1,1,0.00000000,0.00000000,70.00000000,32.00000000,8,70.00000000,32.00000000,1)"
 			));
 		}
+		$r++;
+		if (empty($_Avery_Labels['ZPL_76173'])) {
+			$sql[] = array('sql' => "INSERT INTO `llx_c_format_cards` (`rowid`,`code`,`name`,`paper_size`,`orientation`,`metric`,`leftmargin`,`topmargin`,`nx`,`ny`,`spacex`,`spacey`,`width`,`height`,`font_size`,`custom_x`,`custom_y`,`active`) VALUES ($this->numero + $r,'ZPL_76173','Zebra-76173','custom','L','mm',0.15000000,0.15000000,1,1,0.00000000,0.00000000,57.00000000,32.00000000,8,57.00000000,32.00000000,1)", 'ignoreerror' => 1);
+		} else {
+			$sql = array_merge($sql, array(
+				"DELETE FROM ".MAIN_DB_PREFIX."c_format_cards WHERE code = 'ZPL_76173'",
+				"INSERT INTO `llx_c_format_cards` (`rowid`,`code`,`name`,`paper_size`,`orientation`,`metric`,`leftmargin`,`topmargin`,`nx`,`ny`,`spacex`,`spacey`,`width`,`height`,`font_size`,`custom_x`,`custom_y`,`active`) VALUES ($this->numero + $r,'ZPL_76173','Zebra-76173','custom','L','mm',0.15000000,0.15000000,1,1,0.00000000,0.00000000,57.00000000,32.00000000,8,57.00000000,32.00000000,1)"
+			));
+		}
 		// Document templates
 		/*
 		$moduledir = dol_sanitizeFileName('barcodeprint');

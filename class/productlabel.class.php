@@ -183,7 +183,7 @@ class ProductLabel extends Product
 			$this->textforleft = substr($this->barcode, 0, 12); // checksum made by zpl
 			$this->encoding = 'EAN-13';
 		} else {
-			// EAN code
+			// code 128
 			$this->textforright = '';
 			$this->textforleft = $this->barcode;
 			$this->encoding = 'C-128';
@@ -362,80 +362,115 @@ class ProductLabel extends Product
 		global $conf, $_Avery_Labels, $zpl_labels, $mysoc;
 
 		// TODO make more universal for all ZPL_ label
-		$fontSize = $_Avery_Labels[$modellabel]['font-size'];
-		$leftMargin = (float) $_Avery_Labels[$modellabel]['marginLeft'];
-		$topMargin = (float) $_Avery_Labels[$modellabel]['marginTop'];
-		$width = (float) $_Avery_Labels[$modellabel]['custom_x'] - (2 * $leftMargin);
-		$height = (float) $_Avery_Labels[$modellabel]['custom_y'] - (2 * $topMargin);
-		$zpl_labels = array();
-		$result = 'No label printed';
-		$logodir = $conf->mycompany->dir_output;
-		if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
-			$logodir = $conf->mycompany->multidir_output[$conf->entity];
-		}
-		$logo = $logodir . '/logos/thumbs/'.$mysoc->logo_small;
-		$driver = new \Zpl\ZplBuilder('mm');
-		$driver->setFontMapper(new \Zpl\Fonts\Generic());
-		foreach ($arrayofrecords as $template => $records) {
-			if ($template == 'barcodeprintzebralabel') {
-				foreach ($records as $index => $record) {
-					$driver->reset();
-					$driver->setEncoding(28);
-					$driver->SetFont('0', $fontSize);
-					$driver->SetXY($leftMargin, $topMargin);
-					if ($modellabel == 'ZPL_76174') {
-						if (is_readable($logo)) {
-							$driver->drawGraphic($leftMargin, 1, $logo, 135);
-						}
-						$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
-						if ($record['encoding'] == 'C-128') {
-							$driver->drawCode128($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
-						} elseif ($record['encoding'] == 'DATAMATRIX') {
-							$driver->drawDataMatrix($leftMargin + 8, $topMargin + 7, $record['textleft'], 6);
-							$driver->SetXY($leftMargin + 16 + 12, $topMargin + 8);
-							$cells = explode('\n', $record['textright']);
-							if (is_array($cells)) {
-								if (count($cells) > 0) {
-									$line = 0;
-									foreach ($cells as $cell) {
-										$driver->drawCell(($width / 2), 10, $cell, false, false, 'L');
-										$line += 4;
-										$driver->SetXY($leftMargin + 16 + 12, $topMargin + 8 + $line);
-									}
-								} else {
-									$driver->drawCell(($width / 2), 10, $record['textright'], false, false, 'L');
-								}
+		if (!empty($_Avery_Labels[$modellabel])) {
+			$fontSize = $_Avery_Labels[$modellabel]['font-size'];
+			$leftMargin = (float) $_Avery_Labels[$modellabel]['marginLeft'];
+			$topMargin = (float) $_Avery_Labels[$modellabel]['marginTop'];
+			$width = (float) $_Avery_Labels[$modellabel]['custom_x'] - (2 * $leftMargin);
+			$height = (float) $_Avery_Labels[$modellabel]['custom_y'] - (2 * $topMargin);
+			$zpl_labels = array();
+			$result = 'No label printed';
+			$logodir = $conf->mycompany->dir_output;
+			if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
+				$logodir = $conf->mycompany->multidir_output[$conf->entity];
+			}
+			$logo = $logodir . '/logos/thumbs/'.$mysoc->logo_small;
+			$driver = new \Zpl\ZplBuilder('mm');
+			$driver->setFontMapper(new \Zpl\Fonts\Generic());
+			foreach ($arrayofrecords as $template => $records) {
+				if ($template == 'barcodeprintzebralabel') {
+					foreach ($records as $index => $record) {
+						$driver->reset();
+						$driver->setEncoding(28);
+						$driver->SetFont('0', $fontSize);
+						$driver->SetXY($leftMargin, $topMargin);
+						if ($modellabel == 'ZPL_76173') {
+							if (is_readable($logo)) {
+								$driver->drawGraphic($leftMargin + 35, 1, $logo, 135);
+								$driver->drawCell($width, 10, $record['textheader'], false, false, 'L');
+							} else {
+								$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
 							}
-						} elseif ($record['encoding'] == 'EAN-13') {
-							$driver->drawEAN13($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
-						}
-						$driver->SetXY($leftMargin, $topMargin + 21);
-						$driver->drawCell($width, 10, $record['textfooter'], false, false, 'C');
-					} else {
-						$result = 'Label not supported';
-						break;
-					}
 
-					if (!empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
-						try {
-							\Zpl\Printer::printer($conf->global->BARCODEPRINT_ZEBRA_IP)->send($driver->toZpl());
-							$result = 'Label printed';
-						} catch (\Zpl\CommunicationException $e) {
-							$result = $e->getMessage();
+							if ($record['encoding'] == 'C-128') {
+								$driver->drawCode128($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
+							} elseif ($record['encoding'] == 'DATAMATRIX') {
+								$driver->drawDataMatrix($leftMargin + 3, $topMargin + 7, $record['textleft'], 6);
+								$driver->SetXY($leftMargin + 22, $topMargin + 8);
+								$cells = explode('\n', $record['textright']);
+								if (is_array($cells)) {
+									if (count($cells) > 0) {
+										$line = 0;
+										foreach ($cells as $cell) {
+											$driver->drawCell(($width / 2), 10, $cell, false, false, 'L');
+											$line += 4;
+											$driver->SetXY($leftMargin + 22, $topMargin + 8 + $line);
+										}
+									} else {
+										$driver->drawCell(($width / 2), 10, $record['textright'], false, false, 'L');
+									}
+								}
+							} elseif ($record['encoding'] == 'EAN-13') {
+								$driver->drawEAN13($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
+							}
+							$driver->SetXY($leftMargin, $topMargin + 21);
+							$driver->drawCell($width, 10, $record['textfooter'], false, false, 'C');
+						} elseif ($modellabel == 'ZPL_76174') {
+							if (is_readable($logo)) {
+								$driver->drawGraphic($leftMargin, 1, $logo, 135);
+							}
+							$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
+							if ($record['encoding'] == 'C-128') {
+								$driver->drawCode128($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
+							} elseif ($record['encoding'] == 'DATAMATRIX') {
+								$driver->drawDataMatrix($leftMargin + 8, $topMargin + 7, $record['textleft'], 6);
+								$driver->SetXY($leftMargin + 28, $topMargin + 8);
+								$cells = explode('\n', $record['textright']);
+								if (is_array($cells)) {
+									if (count($cells) > 0) {
+										$line = 0;
+										foreach ($cells as $cell) {
+											$driver->drawCell(($width / 2), 10, $cell, false, false, 'L');
+											$line += 4;
+											$driver->SetXY($leftMargin + 28, $topMargin + 8 + $line);
+										}
+									} else {
+										$driver->drawCell(($width / 2), 10, $record['textright'], false, false, 'L');
+									}
+								}
+							} elseif ($record['encoding'] == 'EAN-13') {
+								$driver->drawEAN13($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
+							}
+							$driver->SetXY($leftMargin, $topMargin + 21);
+							$driver->drawCell($width, 10, $record['textfooter'], false, false, 'C');
+						} else {
+							$result = 'Label not supported';
 							break;
 						}
-					} else {
-						// create set of zpl label files to print
-						$zpl = $driver->toZpl();
-						$zpl_labels[] = $zpl;
-						$result = $zpl_labels;
-						//print_r($zpl);
+
+						if (!empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
+							try {
+								\Zpl\Printer::printer($conf->global->BARCODEPRINT_ZEBRA_IP)->send($driver->toZpl());
+								$result = 'Label printed';
+							} catch (\Zpl\CommunicationException $e) {
+								$result = $e->getMessage();
+								break;
+							}
+						} else {
+							// create set of zpl label files to print
+							$zpl = $driver->toZpl();
+							$zpl_labels[] = $zpl;
+							$result = $zpl_labels;
+							//print_r($zpl);
+						}
 					}
+				} else {
+					$result = "Bad configuration.";
+					break;
 				}
-			} else {
-				$result = "Bad configuration.";
-				break;
 			}
+		} else {
+			$result = "Bad label model";
 		}
 		return $result;
 	}
