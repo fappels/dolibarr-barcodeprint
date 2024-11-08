@@ -58,6 +58,10 @@ class ProductLabel extends Product
 
 	public $day;
 
+	public $batch;
+
+	public $qty;
+
 	/**
 	 * create product lot barcode png file
 	 *
@@ -149,6 +153,13 @@ class ProductLabel extends Product
 		return $destfull;
 	}
 
+	/**
+	 * Build zpl string of barcode (for the moment only Code128, EAN13 and GS1 supported).
+	 * If product with lot number (batch property set with lot number)
+	 * If batch and qty property set also qty 37 AI code will be set with lot qty (only for datamatrix type code)
+	 *
+	 * @param int	$dataMatrixmode	if 1 a datamatrix code will be made else a GS1-128
+	 */
 	public function buildZplBarcode($dataMatrixmode)
 	{
 		$this->template = 'barcodeprintzebralabel';
@@ -166,14 +177,23 @@ class ProductLabel extends Product
 				$this->textforleft = '>;>8010' . $this->barcode . '>810>6' . $this->batch;
 				$this->encoding = 'C-128';
 			}
-		} else {
+		} elseif ($this->barcode_type_code == 'EAN13') {
 			// EAN code
 			$this->textforright = '';
 			$this->textforleft = substr($this->barcode, 0, 12); // checksum made by zpl
 			$this->encoding = 'EAN-13';
+		} else {
+			// EAN code
+			$this->textforright = '';
+			$this->textforleft = $this->barcode;
+			$this->encoding = 'C-128';
 		}
 	}
 
+	/**
+	 * Make GS1-128 barcode png image and store file patch in photoFileName property
+	 * template subtitution '%PHOTO%' to be used
+	 */
 	public function buildGS1PNGBarcode()
 	{
 		// generate GS1-128 barcode
@@ -188,6 +208,9 @@ class ProductLabel extends Product
 		$this->textforright = '%PHOTO%';  // Photo will be barcode image
 	}
 
+	/**
+	 * Make barcode using tcpdf barcode generator (will be generated when making pdf sheet)
+	 */
 	public function buildTCPDFBarcode()
 	{
 		global $conf;
@@ -225,6 +248,9 @@ class ProductLabel extends Product
 		$this->textforright = '%BARCODE%';  // %BARCODE% posible when using TCPDF generator
 	}
 
+	/**
+	 * Make barcode using standard barcode generator, wiil first make png to include in pdf sheet
+	 */
 	public function buildStandardBarcode()
 	{
 		global $conf;
@@ -265,6 +291,11 @@ class ProductLabel extends Product
 		$this->scale = 0.8;
 	}
 
+	/**
+	 * Do label substitution
+	 *
+	 * @return array substituted labels
+	 */
 	public function buildLabelTemplate()
 	{
 		global $conf, $mysoc, $user, $langs;
@@ -318,6 +349,14 @@ class ProductLabel extends Product
 		return $arrayofrecords;
 	}
 
+	/**
+	 * build array of zpl string or send to network printer if BARCODEPRINT_ZEBRA_IP defined
+	 *
+	 * @param string	$modellabel		label model to use
+	 * @param array		$arrayofrecords	array of substituted label
+	 *
+	 * @return array|string	array of zpl string or string with print result.
+	 */
 	public static function buildZplLabels($modellabel = 'ZPL_76174', $arrayofrecords = array())
 	{
 		global $conf, $_Avery_Labels, $zpl_labels, $mysoc;
@@ -329,6 +368,7 @@ class ProductLabel extends Product
 		$width = (float) $_Avery_Labels[$modellabel]['custom_x'] - (2 * $leftMargin);
 		$height = (float) $_Avery_Labels[$modellabel]['custom_y'] - (2 * $topMargin);
 		$zpl_labels = array();
+		$result = 'No label printed';
 		$logodir = $conf->mycompany->dir_output;
 		if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
 			$logodir = $conf->mycompany->multidir_output[$conf->entity];
@@ -350,8 +390,7 @@ class ProductLabel extends Product
 						$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
 						if ($record['encoding'] == 'C-128') {
 							$driver->drawCode128($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
-						}
-						if ($record['encoding'] == 'DATAMATRIX') {
+						} elseif ($record['encoding'] == 'DATAMATRIX') {
 							$driver->drawDataMatrix($leftMargin + 8, $topMargin + 7, $record['textleft'], 6);
 							$driver->SetXY($leftMargin + 16 + 12, $topMargin + 8);
 							$cells = explode('\n', $record['textright']);
@@ -367,8 +406,7 @@ class ProductLabel extends Product
 									$driver->drawCell(($width / 2), 10, $record['textright'], false, false, 'L');
 								}
 							}
-						}
-						if ($record['encoding'] == 'EAN-13') {
+						} elseif ($record['encoding'] == 'EAN-13') {
 							$driver->drawEAN13($leftMargin, $topMargin + 8, $width, 10, $record['textleft'], true, 'N', 'C');
 						}
 						$driver->SetXY($leftMargin, $topMargin + 21);
@@ -381,7 +419,7 @@ class ProductLabel extends Product
 					if (!empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
 						try {
 							\Zpl\Printer::printer($conf->global->BARCODEPRINT_ZEBRA_IP)->send($driver->toZpl());
-							$result = 1;
+							$result = 'Label printed';
 						} catch (\Zpl\CommunicationException $e) {
 							$result = $e->getMessage();
 							break;
@@ -390,7 +428,7 @@ class ProductLabel extends Product
 						// create set of zpl label files to print
 						$zpl = $driver->toZpl();
 						$zpl_labels[] = $zpl;
-						$result = 1;
+						$result = $zpl_labels;
 						//print_r($zpl);
 					}
 				}
@@ -402,6 +440,15 @@ class ProductLabel extends Product
 		return $result;
 	}
 
+	/**
+	 * Make barcode pdf sheet
+	 *
+	 * @param string	$diroutput		pdf output dir
+	 * @param string	$modellabel		label format model
+	 * @param array		$arrayofrecords	array of substituted label
+	 *
+	 * @return string	pdf create result
+	 */
 	public static function buildPDFLabels($diroutput, $modellabel, $arrayofrecords = array())
 	{
 		global $langs;
