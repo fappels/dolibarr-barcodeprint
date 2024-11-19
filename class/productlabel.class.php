@@ -163,18 +163,19 @@ class ProductLabel extends Product
 	public function buildZplBarcode($dataMatrixmode)
 	{
 		$this->template = 'barcodeprintzebralabel';
-		if (!empty($this->batch)) {
+		if (!empty($this->batch) && $this->barcode_type_code == 'EAN13') {
+			$barcodeWithChecksum = $this->fetchBarcodeWithChecksum($this);
 			if (!empty($dataMatrixmode)) {
 				// DATAMATRIX GS1
-				$this->textforright = $this->barcode . '\n' . $this->batch;
+				$this->textforright = $barcodeWithChecksum . '\n' . $this->batch;
 				if ($this->qty > 0) $this->textforright .= '\n' . $this->qty;
-				$this->textforleft = '_1010' . $this->barcode . '10' . $this->batch;
+				$this->textforleft = '_1010' . $barcodeWithChecksum . '10' . $this->batch;
 				if ($this->qty > 0) $this->textforleft .= '_137' . (int) $this->qty;
 				$this->encoding = 'DATAMATRIX';
 			} else {
 				// GS1-128 code 128
 				$this->textforright = '';
-				$this->textforleft = '>;>8010' . $this->barcode . '>810>6' . $this->batch;
+				$this->textforleft = '>;>8010' . $barcodeWithChecksum . '>810>6' . $this->batch;
 				$this->encoding = 'C-128';
 			}
 		} elseif ($this->barcode_type_code == 'EAN13') {
@@ -515,5 +516,98 @@ class ProductLabel extends Product
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * public method to fetch barcode with checksum from dolibarr generated barcodes, which are stored without checksum
+	 *
+	 * @param ProductFournisseur $object product object containing barcode values
+	 *
+	 * @return string barcode with checksum
+	 */
+	public function fetchBarcodeWithChecksum($object)
+	{
+		$barcodeType = '';
+		$barcode = '';
+
+		$barcodeTypeData = $this->readBarcodeType();
+		foreach ($barcodeTypeData as $barcodeType) {
+			$barcodeTypes[$barcodeType->id] = $barcodeType->code;
+		}
+
+		if (!empty($object->supplier_barcode)) {
+			$barcode = $object->supplier_barcode;
+			$barcodeType = $barcodeTypes[$object->supplier_fk_barcode_type];
+		} else {
+			$barcode = $object->barcode;
+			$barcodeType = $barcodeTypes[$object->barcode_type];
+		}
+
+		if ($barcodeType == 'UPC') {
+			// dolibarr UPC is UPCA
+			$barcodeType = 'UPCA';
+		}
+
+		// if barcode is full ean13 and first char in '0', we strip 0 and return stripped value,
+		// because barcode readers interprete ean13 with leading 0 as a UPC code.
+		if (substr($barcode, 0, 1) === '0' && $barcodeType == 'EAN13' && strlen($barcode) == 13) {
+			$barcodeType = '';
+			$barcode = substr($barcode, 1);
+		}
+
+		if (in_array($barcodeType, array('EAN8', 'EAN13', 'UPCA')) && !empty($barcode)) {
+			include_once TCPDF_PATH.'tcpdf_barcodes_1d.php';
+			$barcodeObj = new TCPDFBarcode($barcode, $barcodeType);
+			$barcode = $barcodeObj->getBarcodeArray();
+			return $barcode['code'];
+		} else {
+			return $barcode;
+		}
+	}
+
+	/**
+	 *    Load available barcodetypes
+	 *
+	 *    @return     stdClass result data
+	 */
+	public function readBarcodeType()
+	{
+		global $conf;
+
+		$results = array();
+		$row = new stdClass;
+		if (! empty($conf->barcode->enabled)) {
+			$sql = "SELECT rowid, code, libelle as label, coder";
+			$sql.= " FROM ".MAIN_DB_PREFIX."c_barcode_type";
+			dol_syslog(get_class($this).'::readBarcodeType', LOG_DEBUG);
+			$resql=$this->db->query($sql);
+
+			if ($resql) {
+				$num=$this->db->num_rows($resql);
+				$row->id    = 0;
+				$row->code  = 'NONE';
+				$row->label = '';
+				$row->coder = '0';
+				$row->product_default = false;
+				$row->company_default = false;
+				array_push($results, clone $row);
+				for ($i = 0;$i < $num; $i++) {
+					$obj = $this->db->fetch_object($resql);
+					$row->id    = $obj->rowid;
+					$row->code  = $obj->code;
+					$row->label = $obj->label;
+					$row->coder = $obj->coder;
+					$row->product_default = false;
+					$row->company_default = false;
+					if ($row->id == $conf->global->PRODUIT_DEFAULT_BARCODE_TYPE) {
+						$row->product_default = true;
+					} elseif ($row->id == $conf->global->GENBARCODE_BARCODETYPE_THIRDPARTY) {
+						$row->company_default = true;
+					}
+					array_push($results, clone $row);
+				}
+			}
+		}
+		return $results;
 	}
 }
