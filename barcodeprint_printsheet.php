@@ -221,7 +221,7 @@ if (!$hideView) {
 	if ($producttmp->id > 0) {
 		print '	<div class="tagtr">';
 		print '	<div class="tagtd" style="overflow: hidden; white-space: nowrap; max-width: 300px;">';
-		if ($modellabel == 'ZPL_76174') {
+		if (preg_match('/ZPL/', $modellabel)) {
 			print $langs->trans("NumberOfStickersZpl") . ' &nbsp; ';
 		} else {
 			print $langs->trans("NumberOfStickers") . ' &nbsp; ';
@@ -302,7 +302,7 @@ if (!$hideView) {
 				print $productLabel->ref . ' &nbsp; ' . $productLabel->batch . ' &nbsp; ';
 				print '</div>';
 				print '	<div class="tagtd" style="overflow: hidden; white-space: nowrap; max-width: 300px;">';
-				if ($modellabel == 'ZPL_76174') {
+				if (preg_match('/ZPL/', $modellabel)) {
 					print $langs->trans("NumberOfStickersZpl") . ' &nbsp; ';
 				} else {
 					print $langs->trans("NumberOfStickers") . ' &nbsp; ';
@@ -332,7 +332,7 @@ if (!$hideView) {
 	print '<br>';
 
 
-	if ($modellabel == 'ZPL_76174' && empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
+	if (preg_match('/ZPL/', $modellabel) && empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
 		zebraBrowserPrint();
 	}
 
