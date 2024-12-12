@@ -78,7 +78,7 @@ if ($action == 'builddoc') {
 		}
 
 		if (!empty($productLabel->photoFileName) || $productLabel->template == 'barcodeprinttcpdflabel' || $productLabel->template == 'barcodeprintzebralabel') {
-			$arrayofrecords = $productLabel->buildLabelTemplate();
+			$arrayofrecords = $productLabel->buildLabelTemplate($arrayofrecords);
 		}
 	}
 
@@ -92,8 +92,10 @@ if ($action == 'builddoc') {
 		}
 
 		if (is_string($result) || $result <= 0 || $mesg) {
-			if (empty($mesg)) {
+			if (empty($mesg) && $result < 0) {
 				$mesg = 'Error ' . $result;
+			} else {
+				$mesg = 'No data';
 			}
 
 			setEventMessages($langs->trans('Printer') . ' ' . $mesg, null, 'errors');

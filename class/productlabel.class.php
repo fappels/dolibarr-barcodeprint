@@ -295,13 +295,13 @@ class ProductLabel extends Product
 	/**
 	 * Do label substitution
 	 *
-	 * @return array substituted labels
+	 * @param	array $arrayofrecords already subtituted labels to append to.
+	 * @return	array substituted labels
 	 */
-	public function buildLabelTemplate()
+	public function buildLabelTemplate($arrayofrecords = array())
 	{
 		global $conf, $mysoc, $user, $langs;
 
-		$arrayofrecords = array();
 		// List of values to scan for a replacement
 		$substitutionarray = array(
 			'%LOGIN%' => $user->login,
