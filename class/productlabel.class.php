@@ -387,7 +387,7 @@ class ProductLabel extends Product
 						$driver->SetXY($leftMargin, $topMargin);
 						if ($modellabel == 'ZPL_76173') {
 							if (is_readable($logo)) {
-								$driver->drawGraphic($leftMargin + 35, 1, $logo, 135);
+								$driver->drawGraphic($leftMargin + 41, 1, $logo, 60);
 								$driver->drawCell($width, 10, $record['textheader'], false, false, 'L');
 							} else {
 								$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
