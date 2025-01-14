@@ -183,11 +183,16 @@ class ProductLabel extends Product
 			$this->textforright = '';
 			$this->textforleft = substr($this->barcode, 0, 12); // checksum made by zpl
 			$this->encoding = 'EAN-13';
-		} else {
+		} elseif ($this->barcode_type_code == 'C128') {
 			// code 128
 			$this->textforright = '';
 			$this->textforleft = $this->barcode;
 			$this->encoding = 'C-128';
+		} else {
+			// DATAMATRIX or other with type code compatible with encoding
+			$this->textforright = '';
+			$this->textforleft = $this->barcode;
+			$this->encoding = $this->barcode_type_code;
 		}
 	}
 
