@@ -333,7 +333,7 @@ if (!$hideView) {
 
 
 	if (preg_match('/ZPL/', $modellabel) && empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
-		zebraBrowserPrint();
+		$producttmp->zebraBrowserPrint($zpl_labels);
 	}
 
 	// End of page

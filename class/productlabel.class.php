@@ -524,6 +524,66 @@ class ProductLabel extends Product
 	}
 
 	/**
+	 * print zebra label using Zebra browserprint
+	 *
+	 * @param array	$zpl_labels	array of zpl labels
+	 * @param String	$printer	zebra printer
+	 * @return void
+	 */
+	public function zebraBrowserPrint($zpl_labels, $printer = '')
+	{
+		global $langs;
+
+		$labels = '"'.implode("','", $zpl_labels).'"';
+		$printOk = '"'.$langs->trans("BarcodePrinted").'"';
+		$libPath = dol_buildpath('/barcodeprint/lib/zebra/js/BrowserPrint-3.1.250.min.js', 1);
+
+print <<<HTML
+<script type="text/javascript" src="$libPath"></script>
+<script type="text/javascript">
+
+jQuery(document).ready(function() {
+	var selected_device;
+	var devices = [];
+	var labels = [$labels];
+	var alerted = false;
+
+	function print() {
+		BrowserPrint.getLocalDevices( function(device_list) {
+			// print on first found device
+			selected_device = device_list.printer[0];
+			for (let index = 0; index < labels.length; index++) {
+				if (labels[index]) {
+					selected_device.send(labels[index], function() {
+						console.log(index + ' print ok');
+						/* jnotify(message, preset of message type, keepmessage) */
+						$.jnotify($printOk, "3000", false, {
+							remove: function() {}
+						});
+					}, function(error) {
+						console.log(index + ' print nok');
+						if (!alerted) {
+							/* jnotify(message, preset of message type, keepmessage) */
+							$.jnotify(error, "3000", false, {
+								remove: function() {}
+							});
+						}
+						alerted = true;
+					});
+				}
+			}
+		}, function(error) {
+			alert(error);
+		})
+	}
+
+	print();
+});
+</script>
+HTML;
+	}
+
+	/**
 	 * public method to fetch barcode with checksum from dolibarr generated barcodes, which are stored without checksum
 	 *
 	 * @param ProductFournisseur $object product object containing barcode values
