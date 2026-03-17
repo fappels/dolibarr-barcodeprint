@@ -67,11 +67,11 @@ if ($action == 'builddoc') {
 		}
 
 		if (preg_match('/ZPL/', $modellabel)) {
-			$dataMatrix = (!empty($conf->global->BARCODEPRINT_DATAMATRIX_MODE) ? $conf->global->BARCODEPRINT_DATAMATRIX_MODE : 0);
+			$dataMatrix = (getDolGlobalInt('BARCODEPRINT_DATAMATRIX_MODE') ? getDolGlobalInt('BARCODEPRINT_DATAMATRIX_MODE') : 0);
 			$productLabel->buildZplBarcode($dataMatrix);
 		} elseif (!empty($productLabel->batch)) {
 			$productLabel->buildGS1PNGBarcode();
-		} elseif (!empty($conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR) && $conf->global->BARCODEPRINT_DEFAULT_NONLOT_GENERATOR == 'tcpdf') {
+		} elseif (getDolGlobalString('BARCODEPRINT_DEFAULT_NONLOT_GENERATOR') == 'tcpdf') {
 			$productLabel->buildTCPDFBarcode();
 		} else {
 			$productLabel->buildStandardBarcode();

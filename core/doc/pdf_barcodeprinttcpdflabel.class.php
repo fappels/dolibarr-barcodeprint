@@ -284,7 +284,7 @@ class pdf_barcodeprinttcpdflabel extends CommonStickerGenerator
 			$outputlangs = $langs;
 		}
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
-		if (!empty($conf->global->MAIN_USE_FPDF)) {
+		if (getDolGlobalInt('MAIN_USE_FPDF')) {
 			$outputlangs->charset_output = 'ISO-8859-1';
 		}
 
@@ -294,7 +294,7 @@ class pdf_barcodeprinttcpdflabel extends CommonStickerGenerator
 		$title = $outputlangs->transnoentities('Labels');
 		$keywords = $title." ".$outputlangs->convToOutputCharset($mysoc->name);
 
-		$dir = (empty($outputdir) ? $conf->adherent->dir_temp : $outputdir);
+		$dir = (empty($outputdir) ? $conf->barcodeprint->dir_temp : $outputdir);
 		$file = $dir."/".$filename;
 
 		if (!file_exists($dir)) {
@@ -317,7 +317,7 @@ class pdf_barcodeprinttcpdflabel extends CommonStickerGenerator
 		$pdf->SetCreator("Dolibarr ".DOL_VERSION);
 		$pdf->SetAuthor($outputlangs->convToOutputCharset($user->getFullName($outputlangs)));
 		$pdf->SetKeyWords($keywords);
-		if (!empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) {
+		if (getDolGlobalInt('MAIN_DISABLE_PDF_COMPRESSION')) {
 			$pdf->SetCompression(false);
 		}
 
@@ -360,8 +360,8 @@ class pdf_barcodeprinttcpdflabel extends CommonStickerGenerator
 		// Output to file
 		$pdf->Output($file, 'F');
 
-		if (!empty($conf->global->MAIN_UMASK)) {
-			@chmod($file, octdec($conf->global->MAIN_UMASK));
+		if (getDolGlobalString('MAIN_UMASK')) {
+			@chmod($file, octdec(getDolGlobalString('MAIN_UMASK')));
 		}
 
 

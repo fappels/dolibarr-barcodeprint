@@ -331,11 +331,11 @@ class ProductLabel extends Product
 		complete_substitutions_array($substitutionarray, $langs);
 
 		$textleft = make_substitutions($this->textforleft, $substitutionarray);
-		$textheader = make_substitutions((empty($conf->global->BARCODE_LABEL_HEADER_TEXT) ? '' : $conf->global->BARCODE_LABEL_HEADER_TEXT), $substitutionarray);
-		$textfooter = make_substitutions((empty($conf->global->BARCODE_LABEL_FOOTER_TEXT) ? '' : $conf->global->BARCODE_LABEL_FOOTER_TEXT), $substitutionarray);
+		$textheader = make_substitutions(getDolGlobalString('BARCODE_LABEL_HEADER_TEXT') ? getDolGlobalString('BARCODE_LABEL_HEADER_TEXT') : '', $substitutionarray);
+		$textfooter = make_substitutions(getDolGlobalString('BARCODE_LABEL_FOOTER_TEXT') ? getDolGlobalString('BARCODE_LABEL_FOOTER_TEXT') : '', $substitutionarray);
 		$textright = make_substitutions($this->textforright, $substitutionarray);
-		$forceimgscalewidth = (empty($conf->global->BARCODE_FORCEIMGSCALEWIDTH) ? $this->scale : $conf->global->BARCODE_FORCEIMGSCALEWIDTH);
-		$forceimgscaleheight = (empty($conf->global->BARCODE_FORCEIMGSCALEHEIGHT) ? $this->scale : $conf->global->BARCODE_FORCEIMGSCALEHEIGHT);
+		$forceimgscalewidth = (getDolGlobalString('BARCODE_FORCEIMGSCALEWIDTH') ? getDolGlobalString('BARCODE_FORCEIMGSCALEWIDTH') : $this->scale);
+		$forceimgscaleheight = (getDolGlobalString('BARCODE_FORCEIMGSCALEHEIGHT') ? getDolGlobalString('BARCODE_FORCEIMGSCALEHEIGHT') : $this->scale);
 
 		for ($i = 0; $i < $this->numberofsticker; $i++) {
 			$arrayofrecords[$this->template][] = array(
@@ -454,9 +454,9 @@ class ProductLabel extends Product
 							break;
 						}
 
-						if (!empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
+						if (getDolGlobalString('BARCODEPRINT_ZEBRA_IP')) {
 							try {
-								\Zpl\Printer::printer($conf->global->BARCODEPRINT_ZEBRA_IP)->send($driver->toZpl());
+								\Zpl\Printer::printer(getDolGlobalString('BARCODEPRINT_ZEBRA_IP'))->send($driver->toZpl());
 								$result = 'Label printed';
 							} catch (\Zpl\CommunicationException $e) {
 								$result = $e->getMessage();
@@ -664,9 +664,9 @@ HTML;
 					$row->coder = $obj->coder;
 					$row->product_default = false;
 					$row->company_default = false;
-					if ($row->id == $conf->global->PRODUIT_DEFAULT_BARCODE_TYPE) {
+					if ($row->id == getDolGlobalInt('PRODUIT_DEFAULT_BARCODE_TYPE')) {
 						$row->product_default = true;
-					} elseif ($row->id == $conf->global->GENBARCODE_BARCODETYPE_THIRDPARTY) {
+					} elseif ($row->id == getDolGlobalInt('GENBARCODE_BARCODETYPE_THIRDPARTY')) {
 						$row->company_default = true;
 					}
 					array_push($results, clone $row);

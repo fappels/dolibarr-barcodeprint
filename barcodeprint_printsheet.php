@@ -83,7 +83,7 @@ $month = dol_print_date($now, '%m');
 $day = dol_print_date($now, '%d');
 $forbarcode = GETPOST('forbarcode');
 $fk_barcode_type = GETPOST('fk_barcode_type');
-$modellabel = (GETPOST('modellabel') ? GETPOST('modellabel') : $conf->global->BARCODEPRINT_DEFAULT_MODELLABEL); // Doc template to use
+$modellabel = (GETPOST('modellabel') ? GETPOST('modellabel') : getDolGlobalString('BARCODEPRINT_DEFAULT_MODELLABEL')); // Doc template to use
 $numberofsticker = GETPOST('numberofsticker', 'int');
 $productid = GETPOST('productid');
 $productlotid = GETPOST('productlotid');
@@ -147,7 +147,7 @@ if (GETPOST('receptionid') > 0) {
 				// barcode type = barcode encoding
 				if (empty($productLine->barcode_type)) {
 					setEventMessages($langs->trans("ErrorFieldRequired", $productLine->ref . ' ' . $langs->transnoentitiesnoconv("BarcodeType")), null, 'warnings');
-					$productLine->barcode_type = $conf->global->PRODUIT_DEFAULT_BARCODE_TYPE;
+					$productLine->barcode_type = getDolGlobalInt('PRODUIT_DEFAULT_BARCODE_TYPE');
 					$productLine->fetch_barcode();
 					if ($productLine->verify() < 0) {
 						setEventMessages($langs->trans("ErrorFieldRequired", $productLine->ref . ' ' . $langs->transnoentitiesnoconv($productLine->errors[0])), null, 'errors');
@@ -332,7 +332,7 @@ if (!$hideView) {
 	print '<br>';
 
 
-	if (preg_match('/ZPL/', $modellabel) && empty($conf->global->BARCODEPRINT_ZEBRA_IP)) {
+	if (preg_match('/ZPL/', $modellabel) && empty(getDolGlobalString('BARCODEPRINT_ZEBRA_IP'))) {
 		$producttmp->zebraBrowserPrint($zpl_labels);
 	}
 
