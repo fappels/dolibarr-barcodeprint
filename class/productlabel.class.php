@@ -255,7 +255,7 @@ class ProductLabel extends Product
 	}
 
 	/**
-	 * Make barcode using standard barcode generator, wiil first make png to include in pdf sheet
+	 * Make barcode using standard barcode generator, will first make png to include in pdf sheet
 	 */
 	public function buildStandardBarcode()
 	{
@@ -292,11 +292,20 @@ class ProductLabel extends Product
 		$result = $module->writeBarCode($this->barcode, $this->encoding);
 		if ($result < 0) {
 			$this->photoFileName = '';
+			if (empty($module->error)) {
+				$this->error = 'Failed to generate barcode image, probably ' . $this->encoding . ' is not supported by php barcode generator';
+			} else {
+				$this->error = $module->error;
+			}
+
+			return -1;
 		}
 		$this->template = 'barcodeprintstandardlabel';
 		$this->textforleft = '';
 		$this->textforright = '%PHOTO%';  // Photo will be barcode image
 		$this->scale = 0.8;
+
+		return 1;
 	}
 
 	/**

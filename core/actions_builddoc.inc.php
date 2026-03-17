@@ -74,7 +74,11 @@ if ($action == 'builddoc') {
 		} elseif (getDolGlobalString('BARCODEPRINT_DEFAULT_NONLOT_GENERATOR') == 'tcpdf') {
 			$productLabel->buildTCPDFBarcode();
 		} else {
-			$productLabel->buildStandardBarcode();
+			if ($productLabel->buildStandardBarcode() <= 0) {
+				$error++;
+				setEventMessages('Failed to build standard barcode ' . $productLabel->error, $productLabel->errors, 'errors');
+				break;
+			}
 		}
 
 		if (!empty($productLabel->photoFileName) || $productLabel->template == 'barcodeprinttcpdflabel' || $productLabel->template == 'barcodeprintzebralabel') {
