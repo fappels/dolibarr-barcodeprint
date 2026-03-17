@@ -259,7 +259,9 @@ class ProductLabel extends Product
 	 */
 	public function buildStandardBarcode()
 	{
-		global $conf;
+		global $conf, $bar_color, $bg_color, $text_color, $font_loc;
+
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/barcode.lib.php'; // This is to include def like $genbarcode_loc and $font_loc
 
 		// generate standard barcode
 		$generator = 'phpbarcode'; // coder (loaded by fetch_barcode). Engine.
@@ -285,8 +287,8 @@ class ProductLabel extends Product
 
 		// Load barcode class for generating barcode image
 		$classname = "mod" . ucfirst($generator);
-		$module = new $classname($db);
-		$this->photoFileName = $conf->barcode->dir_temp . '/barcode_' . $this->barcode . '_' . $encoding . '.png';
+		$module = new $classname($this->db);
+		$this->photoFileName = $conf->barcode->dir_temp . '/barcode_' . $this->barcode . '_' . $this->encoding . '.png';
 		$result = $module->writeBarCode($this->barcode, $this->encoding);
 		if ($result < 0) {
 			$this->photoFileName = '';
@@ -492,13 +494,13 @@ class ProductLabel extends Product
 	 */
 	public static function buildPDFLabels($diroutput, $modellabel, $arrayofrecords = array())
 	{
-		global $langs;
+		global $db, $langs;
 
 		$result = 0;
 
 		foreach ($arrayofrecords as $template => $records) {
 			$file = "pdf_" . $template . ".class.php";
-			$outfile = $langs->trans("BarCode") . (!empty($batch) ? '_' . $batch : '') . '_sheets_' . dol_print_date(dol_now(), 'dayhourlog') . '.pdf';
+			$outfile = $langs->trans("BarCode") . '_sheets_' . dol_print_date(dol_now(), 'dayhourlog') . '.pdf';
 			// If selected modele is a filename template (then $modele="modelname:filename")
 			$tmp = explode(':', $template, 2);
 			if (!empty($tmp[1])) {
