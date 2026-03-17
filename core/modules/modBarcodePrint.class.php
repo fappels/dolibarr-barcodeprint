@@ -158,10 +158,7 @@ class modBarcodePrint extends DolibarrModules
 		// Example: $this->const=array(1 => array('BARCODEPRINT_MYNEWCONST1', 'chaine', 'myvalue', 'This is a constant to add', 1),
 		//                             2 => array('BARCODEPRINT_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
 		// );
-		$this->const = array(
-			1=>array('BARCODE_LABEL_HEADER_TEXT', 'chaine', '%PRODUCTREF%', 'What to print on top part of barcode label', 1, 'allentities', 1),
-			2=>array('BARCODE_LABEL_FOOTER_TEXT', 'chaine', '%PRODUCTLABEL%', 'What to print on bottom part of barcode label', 1, 'allentities', 1)
-		);
+		$this->const = array();
 
 		// Some keys to add into the overwriting translation tables
 		/*$this->overwrite_translation = array(
@@ -420,6 +417,15 @@ class modBarcodePrint extends DolibarrModules
 		}
 		if (!getDolGlobalString('BARCODEPRINT_DEFAULT_NONLOT_GENERATOR')) {
 			dolibarr_set_const($this->db, 'BARCODEPRINT_DEFAULT_NONLOT_GENERATOR', 'standard', 'string', 0, '', 0);
+		}
+		if (!getDolGlobalString('BARCODE_LABEL_HEADER_TEXT')) {
+			dolibarr_set_const($this->db, 'BARCODE_LABEL_HEADER_TEXT', '%PRODUCTREF%', 'chaine', 1, '', 1);
+		}
+		if (!getDolGlobalString('BARCODE_LABEL_FOOTER_TEXT')) {
+			dolibarr_set_const($this->db, 'BARCODE_LABEL_FOOTER_TEXT', '%PRODUCTLABEL%', 'chaine', 1, '', 1);
+		}
+		if (!getDolGlobalString('BARCODE_LABEL_LEFT_TEXT')) {
+			dolibarr_set_const($this->db, 'BARCODE_LABEL_LEFT_TEXT', '%BARCODE%', 'chaine', 1, '', 1);
 		}
 
 		// Create extrafields during init
