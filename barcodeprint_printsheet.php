@@ -81,13 +81,14 @@ $now = dol_now();
 $year = dol_print_date($now, '%Y');
 $month = dol_print_date($now, '%m');
 $day = dol_print_date($now, '%d');
-$forbarcode = GETPOST('forbarcode');
-$fk_barcode_type = GETPOST('fk_barcode_type');
-$modellabel = (GETPOST('modellabel') ? GETPOST('modellabel') : getDolGlobalString('BARCODEPRINT_DEFAULT_MODELLABEL')); // Doc template to use
+$forbarcode = GETPOST('forbarcode', 'alphanohtml');
+$fk_barcode_type = GETPOST('fk_barcode_type', 'int');
+$modellabel = (GETPOST('modellabel', 'aZ09') ? GETPOST('modellabel', 'aZ09') : getDolGlobalString('BARCODEPRINT_DEFAULT_MODELLABEL')); // Doc template to use
 $numberofsticker = GETPOST('numberofsticker', 'int');
-$productid = GETPOST('productid');
-$productlotid = GETPOST('productlotid');
-$hideView = GETPOST('hide_view');
+$productid = GETPOST('productid', 'int');
+$productlotid = GETPOST('productlotid', 'int');
+$hideView = GETPOST('hide_view', 'int');
+$receptionid = GETPOST('receptionid', 'int');
 
 if (empty($numberofsticker) && $numberofsticker != "0") {
 	$numberofsticker = 1; // default
@@ -96,6 +97,7 @@ if (empty($numberofsticker) && $numberofsticker != "0") {
 $mesg = '';
 $productLabels = array();
 $zpl_labels = array();
+$error = 0;
 
 $action = GETPOST('action', 'aZ09');
 
@@ -105,69 +107,78 @@ $productlotTmp = new Productlot($db);
 $qty = 0;
 
 if ($productlotid > 0) {
-	$productlotTmp->fetch($productlotid);
-	$productid = $productlotTmp->fk_product;
-	$batch = $productlotTmp->batch;
-	if (!empty($productlotTmp->array_options['options_mobilid_countstep'])) $qty = $productlotTmp->array_options['options_mobilid_countstep'];
+	if ($productlotTmp->fetch($productlotid) > 0) {
+		$productid = $productlotTmp->fk_product;
+		$batch = $productlotTmp->batch;
+		if (!empty($productlotTmp->array_options['options_mobilid_countstep'])) $qty = $productlotTmp->array_options['options_mobilid_countstep'];
 
-	$diroutput = $conf->productbatch->multidir_output[!empty($productlotTmp->entity) ? $productlotTmp->entity : $conf->entity]."/".$productlotTmp->id;
+		$diroutput = $conf->productbatch->multidir_output[!empty($productlotTmp->entity) ? $productlotTmp->entity : $conf->entity]."/".$productlotTmp->id;
+	} else {
+		setEventMessages($langs->trans("ErrorRecordNotFound"), null, 'errors');
+	}
 }
 
 if ($productid > 0) {
-	$producttmp->fetch($productid);
-	if (empty($forbarcode) || empty($fk_barcode_type)) {
-		$forbarcode = $producttmp->barcode;
-		$fk_barcode_type = $producttmp->barcode_type;
-	}
+	if ($producttmp->fetch($productid) > 0) {
+		if (empty($forbarcode) || empty($fk_barcode_type)) {
+			$forbarcode = $producttmp->barcode;
+			$fk_barcode_type = $producttmp->barcode_type;
+		}
 
-	$producttmp->barcode = $forbarcode;
-	$producttmp->barcode_type = $fk_barcode_type;
-	$producttmp->numberofsticker = $numberofsticker;
-	if (!empty($batch)) {
-		$producttmp->batch = $batch;
-		$producttmp->qty = $qty;
+		$producttmp->barcode = $forbarcode;
+		$producttmp->barcode_type = $fk_barcode_type;
+		$producttmp->numberofsticker = $numberofsticker;
+		if (!empty($batch)) {
+			$producttmp->batch = $batch;
+			$producttmp->qty = $qty;
+		} else {
+			$diroutput = $conf->product->multidir_output[$producttmp->entity]."/".get_exdir(0, 0, 0, 0, $producttmp, 'product');
+		}
+		$productLabels[] = $producttmp;
 	} else {
-		$diroutput = $conf->product->multidir_output[$producttmp->entity]."/".get_exdir(0, 0, 0, 0, $producttmp, 'product');
+		setEventMessages($langs->trans("ErrorRecordNotFound"), null, 'errors');
 	}
-	$productLabels[] = $producttmp;
 }
 
 if (GETPOST('receptionid') > 0) {
 	$productLabels = array();
-	$receptionTmp->fetch(GETPOST('receptionid'));
-	$key = 0;
-	foreach ($receptionTmp->lines as $line) {
-		if ($line->fk_product > 0) {
-			$price = 0;
-			$price_ttc = 0;
-			$productLine = new ProductLabel($db);
-			$productLine->fetch($line->fk_product);
+	if ($receptionTmp->fetch($receptionid) > 0) {
+		$key = 0;
+		foreach ($receptionTmp->lines as $line) {
+			if ($line->fk_product > 0) {
+				$price = 0;
+				$price_ttc = 0;
+				$productLine = new ProductLabel($db);
+				$productLine->fetch($line->fk_product);
 
-			if (!empty($productLine->barcode) && empty($productLine->array_options['options_deactivate_label'])) {
-				// barcode type = barcode encoding
-				if (empty($productLine->barcode_type)) {
-					setEventMessages($langs->trans("ErrorFieldRequired", $productLine->ref . ' ' . $langs->transnoentitiesnoconv("BarcodeType")), null, 'warnings');
-					$productLine->barcode_type = getDolGlobalInt('PRODUIT_DEFAULT_BARCODE_TYPE');
-					$productLine->fetch_barcode();
-					if ($productLine->verify() < 0) {
-						setEventMessages($langs->trans("ErrorFieldRequired", $productLine->ref . ' ' . $langs->transnoentitiesnoconv($productLine->errors[0])), null, 'errors');
-						$error++;
+				if (!empty($productLine->barcode) && empty($productLine->array_options['options_deactivate_label'])) {
+					// barcode type = barcode encoding
+					if (empty($productLine->barcode_type)) {
+						setEventMessages($langs->trans("ErrorFieldRequired", $productLine->ref . ' ' . $langs->transnoentitiesnoconv("BarcodeType")), null, 'warnings');
+						$productLine->barcode_type = getDolGlobalInt('PRODUIT_DEFAULT_BARCODE_TYPE');
+						$productLine->fetch_barcode();
+						if ($productLine->verify() < 0) {
+							setEventMessages($langs->trans("ErrorFieldRequired", $productLine->ref . ' ' . $langs->transnoentitiesnoconv($productLine->errors[0])), null, 'errors');
+							$error++;
+						}
 					}
+					$numberofsticker = GETPOST('numberofsticker_'.$key, 'int');
+					if ((!empty($numberofsticker) && $numberofsticker != $line->qty) || $numberofsticker == "0") {
+						$productLine->numberofsticker = $numberofsticker;
+					} else {
+						$productLine->numberofsticker = $line->qty;
+					}
+					$productLine->batch = $line->batch;
+					$productLabels[$key] = $productLine;
+					$key++;
 				}
-				$numberofsticker = GETPOST('numberofsticker_'.$key, 'int');
-				if ((!empty($numberofsticker) && $numberofsticker != $line->qty) || $numberofsticker == "0") {
-					$productLine->numberofsticker = $numberofsticker;
-				} else {
-					$productLine->numberofsticker = $line->qty;
-				}
-				$productLine->batch = $line->batch;
-				$productLabels[$key] = $productLine;
-				$key++;
 			}
 		}
+		$rcpref = dol_sanitizeFileName($receptionTmp->ref);
+		$diroutput = $conf->reception->dir_output."/".$rcpref;
+	} else {
+		setEventMessages($langs->trans("ErrorRecordNotFound"), null, 'errors');
 	}
-	$rcpref = dol_sanitizeFileName($receptionTmp->ref);
-	$diroutput = $conf->reception->dir_output."/".$rcpref;
 }
 
 /*
@@ -236,7 +247,7 @@ if (!$hideView) {
 	print '<br>';
 
 	// Add javascript to make choice dynamic
-	print '<script type="text/javascript" language="javascript">
+	print '<script type="text/javascript">
 	jQuery(document).ready(function() {
 		function init_gendoc_button()
 		{
@@ -286,7 +297,7 @@ if (!$hideView) {
 		print '	<div class="tagtd" style="overflow: hidden; white-space: nowrap; max-width: 300px;">';
 		print $langs->trans("BarcodeValue") . ' &nbsp; ';
 		print '</div><div class="tagtd" style="overflow: hidden; white-space: nowrap; max-width: 300px;">';
-		print '<input size="16" type="text" name="forbarcode" id="forbarcode" value="' . $forbarcode . '">';
+		print '<input size="16" type="text" name="forbarcode" id="forbarcode" value="' . dol_escape_htmltag($forbarcode) . '">';
 		print '</div></div>';
 	}
 
@@ -299,7 +310,7 @@ if (!$hideView) {
 				print $langs->trans("Product") . ' &nbsp; ';
 				print '</div>';
 				print '	<div class="tagtd" style="overflow: hidden; white-space: nowrap; max-width: 300px;">';
-				print $productLabel->ref . ' &nbsp; ' . $productLabel->batch . ' &nbsp; ';
+				print dol_escape_htmltag($productLabel->ref) . ' &nbsp; ' . dol_escape_htmltag($productLabel->batch) . ' &nbsp; ';
 				print '</div>';
 				print '	<div class="tagtd" style="overflow: hidden; white-space: nowrap; max-width: 300px;">';
 				if (preg_match('/ZPL/', $modellabel)) {
