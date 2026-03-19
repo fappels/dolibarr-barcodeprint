@@ -80,7 +80,7 @@ $type = 'myobject';
 $arrayofparameters = array(
 	'BARCODEPRINT_DEFAULT_MODELLABEL'=>array('type'=>'c_format_cards', 'css'=>'minwidth500' ,'enabled'=>1),
 	'BARCODEPRINT_ZEBRA_IP'=>array('type'=>'string', 'css'=>'minwidth500' ,'enabled'=>1),
-	//'BARCODEPRINT_DEFAULT_NONLOT_GENERATOR'=>array('type'=>'string', 'css'=>'minwidth500' ,'enabled'=>1),
+	'BARCODEPRINT_DEFAULT_NONLOT_GENERATOR'=>array('type'=>'generator_type', 'css'=>'minwidth500' ,'enabled'=>1),
 	//'BARCODEPRINT_MYPARAM2'=>array('type'=>'textarea','enabled'=>1),
 	//'BARCODEPRINT_MYPARAM3'=>array('type'=>'category:'.Categorie::TYPE_CUSTOMER, 'enabled'=>1),
 	//'BARCODEPRINT_MYPARAM4'=>array('type'=>'emailtemplate:thirdparty', 'enabled'=>1),
@@ -215,6 +215,10 @@ if ($action == 'edit') {
 					$arrayoflabels[$codecards] = $labeltoshow;
 				}
 				asort($arrayoflabels);
+				print $form->selectarray($constname, $arrayoflabels, getDolGlobalString($constname), 'None', 0, 0, '', 0, 0, 0, '', '', 1);
+			} elseif ($val['type'] == 'generator_type') {
+				// Custom handling for generator_type type
+				$arrayoflabels = array('standard' => 'Standard barcode generator', 'tcpdf' => 'TCPDF barcode generator');
 				print $form->selectarray($constname, $arrayoflabels, getDolGlobalString($constname), 'None', 0, 0, '', 0, 0, 0, '', '', 1);
 			} else {
 				print '<input name="'.$constname.'"  class="flat '.(empty($val['css']) ? 'minwidth200' : $val['css']).'" value="'.getDolGlobalString($constname).'">';
