@@ -244,10 +244,10 @@ class ZplBuilder extends AbstractBuilder
      * {@inheritDoc}
      * @see \Zpl\AbstractBuilder::drawDataMatrix()
      */
-    public function drawDataMatrix(float $x, float $y, string $data, int $height = 6, string $orientation = 'N') : void
+    public function drawDataMatrix(float $x, float $y, string $data, int $height = 6, string $orientation = 'N', int $gridsize = 26) : void
     {
         $this->commands[] = '^FO' . $this->toDots($x) . ',' . $this->toDots($y);
-        $this->commands[] = '^BX' . $orientation . ',' . $height . ',' . '200,20,20,1,_,1';
+        $this->commands[] = '^BX' . $orientation . ',' . $height . ',' . '200,' . $gridsize . ',' . $gridsize . ',6,_,1';
         $this->commands[] = '^FD' . $data . '^FS';
     }
 

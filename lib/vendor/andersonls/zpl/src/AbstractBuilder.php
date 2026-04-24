@@ -179,8 +179,9 @@ abstract class AbstractBuilder
      * @param string $data   Data to draw the barcode
      * @param int    $height The height of the datamatrix Code (1 to the width of the label)
      * @param string $orientation orientation 'N', 'R', 'I' or 'B'
+	 * @param int    $gridsize The size of the datamatrix grid (10 to 144)
      */
-     abstract public function drawDataMatrix(float $x, float $y, string $data, int $height = 6, string $orientation = 'N') : void;
+     abstract public function drawDataMatrix(float $x, float $y, string $data, int $height = 6, string $orientation = 'N', int $gridsize = 26) : void;
 
     /**
      * @param float  $x         X position in user units
