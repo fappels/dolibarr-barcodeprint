@@ -413,19 +413,19 @@ class modBarcodePrint extends DolibarrModules
 
 		// set default constant on first enable
 		if (!getDolGlobalString('BARCODEPRINT_DEFAULT_MODELLABEL')) {
-			dolibarr_set_const($this->db, 'BARCODEPRINT_DEFAULT_MODELLABEL', 'L7160', 'string', 0, '', 0);
+			dolibarr_set_const($this->db, 'BARCODEPRINT_DEFAULT_MODELLABEL', 'L7160', 'string', 0, '', $conf->entity);
 		}
 		if (!getDolGlobalString('BARCODEPRINT_DEFAULT_NONLOT_GENERATOR')) {
-			dolibarr_set_const($this->db, 'BARCODEPRINT_DEFAULT_NONLOT_GENERATOR', 'standard', 'string', 0, '', 0);
+			dolibarr_set_const($this->db, 'BARCODEPRINT_DEFAULT_NONLOT_GENERATOR', 'standard', 'string', 0, '', $conf->entity);
 		}
 		if (!getDolGlobalString('BARCODE_LABEL_HEADER_TEXT')) {
-			dolibarr_set_const($this->db, 'BARCODE_LABEL_HEADER_TEXT', '%PRODUCTREF%', 'chaine', 1, '', 1);
+			dolibarr_set_const($this->db, 'BARCODE_LABEL_HEADER_TEXT', '%PRODUCTREF%', 'chaine', 1, '', $conf->entity);
 		}
 		if (!getDolGlobalString('BARCODE_LABEL_FOOTER_TEXT')) {
-			dolibarr_set_const($this->db, 'BARCODE_LABEL_FOOTER_TEXT', '%PRODUCTLABEL%', 'chaine', 1, '', 1);
+			dolibarr_set_const($this->db, 'BARCODE_LABEL_FOOTER_TEXT', '%PRODUCTLABEL%', 'chaine', 1, '', $conf->entity);
 		}
 		if (!getDolGlobalString('BARCODE_LABEL_LEFT_TEXT')) {
-			dolibarr_set_const($this->db, 'BARCODE_LABEL_LEFT_TEXT', '%BARCODE%', 'chaine', 1, '', 1);
+			dolibarr_set_const($this->db, 'BARCODE_LABEL_LEFT_TEXT', '%BARCODE%', 'chaine', 1, '', $conf->entity);
 		}
 
 		// Create extrafields during init
@@ -447,7 +447,7 @@ class modBarcodePrint extends DolibarrModules
 			1, // Visibilty
 			0, // Deprecated. Use visibility instead.
 			'', // Computed value
-			'', // Entity of extrafields (for multicompany modules)
+			$conf->entity, // Entity of extrafields (for multicompany modules)
 			'barcodeprint@barcodeprint', // Language file
 			'$conf->barcodeprint->enabled' // Condition to have the field enabled or not
 		);
