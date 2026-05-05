@@ -269,7 +269,7 @@ class ZplBuilder extends AbstractBuilder
             $offsetX = round(($this->toDots($width) - ((strlen($dataWithoutControl) * 7) + 7) * 2) / 2);
         }
         $this->commands[] = '^FO' . ($this->toDots($x) + $offsetX) . ',' . $this->toDots($y);
-        $this->commands[] = '^BE' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N,N,A';
+        $this->commands[] = '^BE' . $orientation . ',' . $this->toDots($height) . ',' . ($printData === true ? 'Y' : 'N') . ',N';
         $this->commands[] = '^FD' . $data . '^FS';
     }
 
