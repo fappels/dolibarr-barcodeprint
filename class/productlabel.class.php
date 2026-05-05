@@ -381,8 +381,8 @@ class ProductLabel extends Product
 		// TODO make more universal for all ZPL_ label
 		if (!empty($_Avery_Labels[$modellabel])) {
 			$fontSize = $_Avery_Labels[$modellabel]['font-size'];
-			$leftMargin = (float) $_Avery_Labels[$modellabel]['marginLeft'];
-			$topMargin = (float) $_Avery_Labels[$modellabel]['marginTop'];
+			$leftMargin = (float) $_Avery_Labels[$modellabel]['marginLeft'] + (float) $_Avery_Labels[$modellabel]['spacing_x'] / 2;
+			$topMargin = (float) $_Avery_Labels[$modellabel]['marginTop'] + (float) $_Avery_Labels[$modellabel]['spacing_y'] / 2;
 			$width = (float) $_Avery_Labels[$modellabel]['custom_x'] - (2 * $leftMargin);
 			$height = (float) $_Avery_Labels[$modellabel]['custom_y'] - (2 * $topMargin);
 			$zpl_labels = array();
@@ -403,7 +403,7 @@ class ProductLabel extends Product
 						$driver->SetXY($leftMargin, $topMargin);
 						if ($modellabel == 'ZPL_76173') {
 							if (is_readable($logo)) {
-								$driver->drawGraphic($leftMargin + 41, 1, $logo, 60);
+								$driver->drawGraphic($leftMargin + 41, $topMargin + 1, $logo, 60);
 								$driver->drawCell($width, 10, $record['textheader'], false, false, 'L');
 							} else {
 								$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
@@ -434,7 +434,7 @@ class ProductLabel extends Product
 							$driver->drawCell($width, 10, $record['textfooter'], false, false, 'C');
 						} elseif ($modellabel == 'ZPL_76174') {
 							if (is_readable($logo)) {
-								$driver->drawGraphic($leftMargin, 1, $logo, 135);
+								$driver->drawGraphic($leftMargin, $topMargin + 1, $logo, 135);
 							}
 							$driver->drawCell($width, 10, $record['textheader'], false, false, 'C');
 							if ($record['encoding'] == 'C-128') {
