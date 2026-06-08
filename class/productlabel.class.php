@@ -62,6 +62,10 @@ class ProductLabel extends Product
 
 	public $qty;
 
+	public $sellby;
+	
+	public $eatby;
+
 	/**
 	 * create product lot barcode png file
 	 *
@@ -167,9 +171,25 @@ class ProductLabel extends Product
 			$barcodeWithChecksum = $this->fetchBarcodeWithChecksum($this);
 			if (!empty($dataMatrixmode)) {
 				// DATAMATRIX GS1
-				$this->textforright = $barcodeWithChecksum . '\n' . $this->batch;
+				$this->textforright = 'EAN: ' . $barcodeWithChecksum;
+				if (!empty($this->batch)) {
+					$this->textforright .= '\nLot: ' . $this->batch;
+				}
+				if (!empty($this->sellby)) {
+					$this->textforright .= '\nDate: ' . dol_print_date($this->sellby, '%d/%m/%Y');
+				} elseif (!empty($this->eatby)) {
+					$this->textforright .= '\nDate: ' . dol_print_date($this->eatby, '%d/%m/%Y');
+				}
 				if ($this->qty > 0) $this->textforright .= '\n' . $this->qty;
-				$this->textforleft = '_1010' . $barcodeWithChecksum . '10' . $this->batch;
+				$this->textforleft = '_1010' . $barcodeWithChecksum;
+				if (!empty($this->sellby)) {
+					$this->textforleft .= '16' . dol_print_date($this->sellby, 'ymd');
+				} elseif (!empty($this->eatby)) {
+					$this->textforleft .= '17' . dol_print_date($this->eatby, 'ymd');
+				}
+				if (!empty($this->batch)) {
+					$this->textforleft .= '10' . $this->batch;
+				}
 				if ($this->qty > 0) $this->textforleft .= '_137' . (int) $this->qty;
 				$this->encoding = 'DATAMATRIX';
 			} else {

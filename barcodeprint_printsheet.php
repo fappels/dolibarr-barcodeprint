@@ -105,11 +105,15 @@ $producttmp = new ProductLabel($db);
 $receptionTmp = new Reception($db);
 $productlotTmp = new Productlot($db);
 $qty = 0;
+$sellby = '';
+$eatby = '';
 
 if ($productlotid > 0) {
 	if ($productlotTmp->fetch($productlotid) > 0) {
 		$productid = $productlotTmp->fk_product;
 		$batch = $productlotTmp->batch;
+		$sellby = $productlotTmp->sellby;
+		$eatby = $productlotTmp->eatby;
 		if (!empty($productlotTmp->array_options['options_mobilid_countstep'])) $qty = $productlotTmp->array_options['options_mobilid_countstep'];
 
 		$diroutput = $conf->productbatch->multidir_output[!empty($productlotTmp->entity) ? $productlotTmp->entity : $conf->entity]."/".$productlotTmp->id;
@@ -131,6 +135,8 @@ if ($productid > 0) {
 		if (!empty($batch)) {
 			$producttmp->batch = $batch;
 			$producttmp->qty = $qty;
+			$producttmp->sellby = $sellby;
+			$producttmp->eatby = $eatby;
 		} else {
 			$diroutput = $conf->product->multidir_output[$producttmp->entity]."/".get_exdir(0, 0, 0, 0, $producttmp, 'product');
 		}
