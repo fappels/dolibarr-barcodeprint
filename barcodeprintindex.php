@@ -57,6 +57,10 @@ if (!$res) {
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 
+/** @var Translate $langs */
+/** @var Conf $conf */
+/** @var DoliDB $db */
+
 // Load translation files required by the page
 $langs->loadLangs(array("barcodeprint@barcodeprint"));
 

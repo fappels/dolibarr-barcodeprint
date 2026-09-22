@@ -56,6 +56,13 @@ global $langs, $user;
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once '../lib/barcodeprint.lib.php';
 
+/**
+ * @var Translate $langs
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var array $_Avery_Labels
+ */
+
 // Translations
 $langs->loadLangs(array("admin", "barcodeprint@barcodeprint"));
 

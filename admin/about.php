@@ -55,6 +55,12 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once '../lib/barcodeprint.lib.php';
 
+/**
+ * @var Translate $langs
+ * @var Conf $conf
+ * @var DoliDB $db
+ */
+
 // Translations
 $langs->loadLangs(array("errors", "admin", "barcodeprint@barcodeprint"));
 

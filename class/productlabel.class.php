@@ -38,32 +38,74 @@ class ProductLabel extends Product
 	 */
 	public $numberofsticker = 1;
 
+	/**
+	 * @var string $template label template to use ('barcodeprintzebralabel', 'barcodeprintstandardlabel' or 'barcodeprinttcpdflabel')
+	 */
 	public $template;
 
+	/**
+	 * @var float $scale scale to apply to the barcode/photo image on the label
+	 */
 	public $scale;
 
+	/**
+	 * @var string $textforleft text or barcode content to print on the left of the label
+	 */
 	public $textforleft;
 
+	/**
+	 * @var string $textforright text to print on the right of the label, or '%PHOTO%'/'%BARCODE%' placeholder
+	 */
 	public $textforright;
 
+	/**
+	 * @var string $encoding barcode encoding type used by the label template
+	 */
 	public $encoding;
 
+	/**
+	 * @var bool $is2d true if barcode is a 2D barcode
+	 */
 	public $is2d;
 
+	/**
+	 * @var string $photoFileName full path of the generated barcode image file
+	 */
 	public $photoFileName;
 
+	/**
+	 * @var string $year year substitution value ('%YEAR%')
+	 */
 	public $year;
 
+	/**
+	 * @var string $month month substitution value ('%MONTH%')
+	 */
 	public $month;
 
+	/**
+	 * @var string $day day substitution value ('%DAY%')
+	 */
 	public $day;
 
+	/**
+	 * @var string $batch lot/batch number of the product
+	 */
 	public $batch;
 
+	/**
+	 * @var float $qty quantity of the lot/batch
+	 */
 	public $qty;
 
+	/**
+	 * @var int $sellby sell-by date (timestamp) of the lot/batch
+	 */
 	public $sellby;
 
+	/**
+	 * @var int $eatby eat-by date (timestamp) of the lot/batch
+	 */
 	public $eatby;
 
 	/**
@@ -276,6 +318,8 @@ class ProductLabel extends Product
 
 	/**
 	 * Make barcode using standard barcode generator, will first make png to include in pdf sheet
+	 *
+	 * @return int	1 if OK, -1 if barcode image generation failed
 	 */
 	public function buildStandardBarcode()
 	{

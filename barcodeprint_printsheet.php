@@ -73,6 +73,13 @@ dol_include_once('/barcodeprint/lib/barcodeprint.lib.php');
 dol_include_once('/barcodeprint/class/productlabel.class.php');
 dol_include_once('/product/stock/class/productlot.class.php');
 
+/**
+ * @var Translate $langs
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var array $_Avery_Labels
+ */
+
 // Load translation files required by the page
 $langs->loadLangs(array('admin', 'members', 'errors', 'barcodeprint@barcodeprint'));
 
