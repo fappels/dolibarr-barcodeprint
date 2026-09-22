@@ -35,6 +35,8 @@ BARCODEPRINT_DEFAULT_NONLOT_GENERATORTooltip='standard' or 'tcpdf'
 BARCODEPRINT_ZEBRA_IP = IP address Zebra printer
 BARCODEPRINT_DATAMATRIX_MODE = GS1 datamatrix
 #BARCODEPRINT_DATAMATRIX_MODETooltip = datamatrix tooltip
+BARCODEPRINT_DISABLE_PRINT_LOGO = Disable printing company logo on Zebra label
+BARCODEPRINT_DISABLE_PRINT_LOGOTooltip = If enabled, no company logo is printed on the Zebra ZPL label
 DeactivateLabel = Deactivate barcode label
 #
 # About page

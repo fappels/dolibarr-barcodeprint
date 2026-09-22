@@ -35,6 +35,8 @@ BARCODEPRINT_DEFAULT_NONLOT_GENERATORTooltip='standard' ou 'tcpdf'
 BARCODEPRINT_ZEBRA_IP = Adresse IP du imprimante Zebra
 BARCODEPRINT_DATAMATRIX_MODE = GS1 datamatrix
 #BARCODEPRINT_DATAMATRIX_MODETooltip = datamatrix tooltip
+BARCODEPRINT_DISABLE_PRINT_LOGO = Désactiver l'impression du logo de la société sur l'étiquette Zebra
+BARCODEPRINT_DISABLE_PRINT_LOGOTooltip = Si activé, aucun logo de société n'est imprimé sur l'étiquette Zebra ZPL
 DeactivateLabel = Désactiver étiquette code barre
 
 #

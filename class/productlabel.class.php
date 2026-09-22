@@ -63,7 +63,7 @@ class ProductLabel extends Product
 	public $qty;
 
 	public $sellby;
-	
+
 	public $eatby;
 
 	/**
@@ -401,17 +401,21 @@ class ProductLabel extends Product
 		// TODO make more universal for all ZPL_ label
 		if (!empty($_Avery_Labels[$modellabel])) {
 			$fontSize = $_Avery_Labels[$modellabel]['font-size'];
-			$leftMargin = (float) $_Avery_Labels[$modellabel]['marginLeft'] + (float) $_Avery_Labels[$modellabel]['spacing_x'] / 2;
-			$topMargin = (float) $_Avery_Labels[$modellabel]['marginTop'] + (float) $_Avery_Labels[$modellabel]['spacing_y'] / 2;
+			$leftMargin = (float) $_Avery_Labels[$modellabel]['marginLeft'] + (float) $_Avery_Labels[$modellabel]['SpaceX'] / 2;
+			$topMargin = (float) $_Avery_Labels[$modellabel]['marginTop'] + (float) $_Avery_Labels[$modellabel]['SpaceY'] / 2;
 			$width = (float) $_Avery_Labels[$modellabel]['custom_x'] - (2 * $leftMargin);
 			$height = (float) $_Avery_Labels[$modellabel]['custom_y'] - (2 * $topMargin);
 			$zpl_labels = array();
 			$result = 'No label printed';
-			$logodir = $conf->mycompany->dir_output;
-			if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
-				$logodir = $conf->mycompany->multidir_output[$conf->entity];
+			$printlogo = !getDolGlobalInt('BARCODEPRINT_DISABLE_PRINT_LOGO', 0);
+			$logo = '';
+			if ($printlogo) {
+				$logodir = $conf->mycompany->dir_output;
+				if (!empty($conf->mycompany->multidir_output[$conf->entity])) {
+					$logodir = $conf->mycompany->multidir_output[$conf->entity];
+				}
+				$logo = $logodir . '/logos/thumbs/'.$mysoc->logo_small;
 			}
-			$logo = $logodir . '/logos/thumbs/'.$mysoc->logo_small;
 			$driver = new \Zpl\ZplBuilder('mm');
 			$driver->setFontMapper(new \Zpl\Fonts\Generic());
 			foreach ($arrayofrecords as $template => $records) {
@@ -625,18 +629,19 @@ HTML;
 	{
 		$barcodeType = '';
 		$barcode = '';
+		$barcodeTypes = array();
 
 		$barcodeTypeData = $this->readBarcodeType();
-		foreach ($barcodeTypeData as $barcodeType) {
-			$barcodeTypes[$barcodeType->id] = $barcodeType->code;
+		foreach ($barcodeTypeData as $barcodeTypeRow) {
+			$barcodeTypes[$barcodeTypeRow->id] = $barcodeTypeRow->code;
 		}
 
 		if (!empty($object->supplier_barcode)) {
 			$barcode = $object->supplier_barcode;
-			$barcodeType = $barcodeTypes[$object->supplier_fk_barcode_type];
+			$barcodeType = isset($barcodeTypes[$object->supplier_fk_barcode_type]) ? $barcodeTypes[$object->supplier_fk_barcode_type] : '';
 		} else {
 			$barcode = $object->barcode;
-			$barcodeType = $barcodeTypes[$object->barcode_type];
+			$barcodeType = isset($barcodeTypes[$object->barcode_type]) ? $barcodeTypes[$object->barcode_type] : '';
 		}
 
 		if ($barcodeType == 'UPC') {

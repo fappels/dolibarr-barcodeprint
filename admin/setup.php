@@ -85,6 +85,7 @@ $arrayofparameters = array(
 	//'BARCODEPRINT_MYPARAM3'=>array('type'=>'category:'.Categorie::TYPE_CUSTOMER, 'enabled'=>1),
 	//'BARCODEPRINT_MYPARAM4'=>array('type'=>'emailtemplate:thirdparty', 'enabled'=>1),
 	'BARCODEPRINT_DATAMATRIX_MODE'=>array('type'=>'yesno', 'enabled'=>1),
+	'BARCODEPRINT_DISABLE_PRINT_LOGO'=>array('type'=>'yesno', 'enabled'=>1),
 	//'BARCODEPRINT_MYPARAM5'=>array('type'=>'thirdparty_type', 'enabled'=>1),
 	//'BARCODEPRINT_MYPARAM6'=>array('type'=>'securekey', 'enabled'=>1),
 	//'BARCODEPRINT_MYPARAM7'=>array('type'=>'product', 'enabled'=>1),
