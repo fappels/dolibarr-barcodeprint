@@ -57,26 +57,7 @@ NumberOfStickersZpl = Number of labels to print
 #
 # hooks
 #
-producible = Producible
-ValidatedProducible = Validated and producible
-InprogressProducible = In progress and producible
-ValidatedPartlyProducible = Validated partly producible
-InprogressPartlyProducible = In progress partly producible
-ValidatedNotProducible = Validated not producible
-InprogressNotProducible = In progress not producible
-GenerateDocZip = Generate documents
-documented = Documented
-DefaultDocs = Default documents
-Docs = Documents
-NoDocuments = No Documents for making zip
-NoProducedDocumentForBatch = No documents for produced lot %s
-NoConsumedDocumentForBatch = No documents for consumed lot %s
-NoLines = No lines for making zip
-OnlyDefaultProducedDocumentForBatch = Only default document %s for produced lot %s
-OnlyDefaultConsumedDocumentForBatch = Only default document %s for consumed lot %s
-LotDocsOnBothRefAndId = Documents are located both on lot ref and id location
-LotDocsOnBothRefAndIdMesg = Documents are located both on lot ref and id location for lot %s
-DocumentZipGenerated = Documents zip generated
+
 
 #
 # Sample widget
@@ -87,4 +68,3 @@ MyWidgetDescription = My widget description
 #
 # triggers
 #
-UnknownProject = Unknown project reference
