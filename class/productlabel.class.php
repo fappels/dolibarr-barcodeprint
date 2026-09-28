@@ -125,8 +125,11 @@ class ProductLabel extends Product
 		$modulepart = 'product_batch';
 		$upload_dir = $conf->productbatch->multidir_output[$productLot->entity].'/'.get_exdir(0, 0, 0, 1, $productLot, $modulepart);
 		// check if there are already doc on old location
+		// temporarily use batch as ref to build old location, restore after so caller's object (and tab file count) is not affected
+		$oldRef = $productLot->ref;
 		$productLot->ref = $productLot->batch;
 		$check_dir = $conf->productbatch->multidir_output[$productLot->entity].'/'.get_exdir(0, 0, 0, 1, $productLot, $modulepart);
+		$productLot->ref = $oldRef;
 		$oldfilearray = dol_dir_list($check_dir, "files");
 		if (!empty($oldfilearray)) {
 			$upload_dir = $check_dir;

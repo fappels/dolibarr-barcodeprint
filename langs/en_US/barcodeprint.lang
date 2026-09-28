@@ -55,6 +55,7 @@ BarcodePrinted = Barcode label(s) printed
 OnlyOneGeneratorTypeAllowed = Only one type of generator allowed
 printer = Printer
 NumberOfStickersZpl = Number of labels to print
+BarcodeLabel = Label
 
 #
 # hooks

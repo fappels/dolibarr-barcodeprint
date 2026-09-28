@@ -72,7 +72,7 @@ class modBarcodePrint extends DolibarrModules
 		$this->editor_url = 'https://www.z-application.com';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.0.5';
+		$this->version = '1.0.6';
 		// Url to the file with your last numberversion of this module
 		//$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
@@ -173,9 +173,9 @@ class modBarcodePrint extends DolibarrModules
 
 		// Array to add new pages in new tabs
 		$this->tabs = array();
-		$this->tabs[] = array('data'=>'reception:+barcodeprinttab1:Label:barcodeprint@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/barcodeprint_printsheet.php?receptionid=__ID__');
-		$this->tabs[] = array('data'=>'product:+barcodeprinttab1:Label:barcodeprint@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/barcodeprint_printsheet.php?productid=__ID__');
-		$this->tabs[] = array('data'=>'productlot:+barcodeprinttab1:Label:barcodeprint@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/barcodeprint_printsheet.php?productlotid=__ID__');
+		$this->tabs[] = array('data'=>'reception:+barcodeprinttab1:BarcodeLabel:barcodeprint@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/barcodeprint_printsheet.php?receptionid=__ID__');
+		$this->tabs[] = array('data'=>'product:+barcodeprinttab1:BarcodeLabel:barcodeprint@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/barcodeprint_printsheet.php?productid=__ID__');
+		$this->tabs[] = array('data'=>'productlot:+barcodeprinttab1:BarcodeLabel:barcodeprint@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/barcodeprint_printsheet.php?productlotid=__ID__');
 		// Example:
 		// $this->tabs[] = array('data'=>'objecttype:+tabname1:Title1:mylangfile@barcodeprint:$user->rights->barcodeprint->read:/barcodeprint/mynewtab1.php?id=__ID__');  					// To add a new tab identified by code tabname1
 		// $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@barcodeprint:$user->rights->othermodule->read:/barcodeprint/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
