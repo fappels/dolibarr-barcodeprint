@@ -1,5 +1,9 @@
 # CHANGELOG BARCODEPRINT FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
 
+## 1.0.6
+- Fix translation of tab Titles
+- Fix update files linked badge on generarate barcode
+
 ## 1.0.5
 - Dolibarr V24 compatibility
 - Add setup to disable logo print
